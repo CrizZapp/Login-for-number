@@ -88,10 +88,64 @@ ENVIAR CÓDIGO
 VERIFICAR CÓDIGO
 </button>
 
-<!-- CAPTCHA -->
+<!-- CAPTCHA (AQUÍ VA) -->
 <div id="recaptcha-container" style="margin-top:15px;"></div>
 
 </div>
+
+<script>
+
+const firebaseConfig={
+apiKey:"AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
+authDomain:"ingresa-dfec2.firebaseapp.com",
+projectId:"ingresa-dfec2",
+storageBucket:"ingresa-dfec2.appspot.com",
+messagingSenderId:"441882283200",
+appId:"1:441882283200:web:8067df85facc2d67d77125"
+}
+
+firebase.initializeApp(firebaseConfig)
+const auth = firebase.auth()
+
+const provider = new firebase.auth.GoogleAuthProvider()
+
+function loginGoogle(){
+auth.signInWithPopup(provider)
+}
+
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
+'recaptcha-container',
+{size:'normal'},
+auth
+)
+
+recaptchaVerifier.render()
+
+function sendCode(){
+
+const phone = document.getElementById("phone").value
+const appVerifier = window.recaptchaVerifier
+
+auth.signInWithPhoneNumber(phone, appVerifier)
+.then(result=>{
+window.confirmationResult = result
+alert("Código enviado")
+})
+
+}
+
+function verifyCode(){
+
+const code = document.getElementById("code").value
+
+confirmationResult.confirm(code)
+.then(result=>{
+alert("Bienvenido "+result.user.phoneNumber)
+})
+
+}
+
+</script>
 
 </body>
 </html>
