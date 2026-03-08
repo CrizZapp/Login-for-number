@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrizZapp | Acceso</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:sans-serif;
+background:#020406;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+background:#0d1218;
+padding:30px;
+border-radius:15px;
+border:2px solid #4facfe;
+text-align:center;
+width:320px;
+}
+
+h1{
+color:#4facfe;
+margin-bottom:15px;
+text-shadow:0 0 10px #4facfe;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:none;
+}
+
+.btn{
+background:#fff;
+color:#000;
+border:none;
+padding:12px;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+width:100%;
+margin-top:10px;
+}
+
+.content{display:none}
+
+.user-img{
+width:60px;
+border-radius:50%;
+margin-bottom:10px;
+border:2px solid #4facfe;
+}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+
+<h1>CrizZapp</h1>
+
+<div id="login-box">
+
+<p style="margin-bottom:20px;color:#8696a0;">
+Inicia sesión para continuar
+</p>
+
+<button class="btn" onclick="loginGoogle()">
+ENTRAR CON GOOGLE
+</button>
+
+<p style="margin:15px 0;color:#8696a0;">
+o continuar con teléfono
+</p>
+
+<input id="phone" placeholder="+598XXXXXXXX">
+
+<button class="btn" onclick="sendCode()">
+ENVIAR CÓDIGO
+</button>
+
+<input id="code" placeholder="Código SMS">
+
+<button class="btn" onclick="verifyCode()">
+VERIFICAR CÓDIGO
+</button>
+
+<div id="recaptcha-container"></div>
+
+</div>
+
+
+<div id="main-box" class="content">
+
+<img id="pfp" src="" class="user-img">
+
+<h3 id="name" style="margin-bottom:10px;"></h3>
+
+<p style="color:#00ff88;font-size:0.9em;margin-bottom:20px;">
+✅ Acceso Autorizado
+</p>
+
+<button onclick="location.href='panel.html'"
+class="btn"
+style="background:#4facfe;color:white;">
+IR AL PANEL
+</button>
+
+<p onclick="logout()"
+style="margin-top:20px;font-size:0.8em;color:#ff3d00;cursor:pointer;">
+Cerrar Sesión
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+const firebaseConfig={
+apiKey:"AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
+authDomain:"ingresa-dfec2.firebaseapp.com",
+projectId:"ingresa-dfec2",
+storageBucket:"ingresa-dfec2.appspot.com",
+messagingSenderId:"441882283200",
+appId:"1:441882283200:web:8067df85facc2d67d77125"
+}
+
+firebase.initializeApp(firebaseConfig)
+
+const auth=firebase.auth()
+
+const provider=new firebase.auth.GoogleAuthProvider()
+
+
+
+function loginGoogle(){
+
+auth.signInWithPopup(provider)
+.catch(e=>alert("Error: "+e.message))
+
+}
+
+
+
+window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier(
+'recaptcha-container',
+{size:'normal'},
+auth
+)
+
+
+
+function sendCode(){
+
+const phone=document.getElementById("phone").value
+
+auth.signInWithPhoneNumber(phone,window.recaptchaVerifier)
+
+.then(result=>{
+
+window.confirmationResult=result
+alert("Código enviado")
+
+})
+
+.catch(e=>alert(e.message))
+
+}
+
+
+
+function verifyCode(){
+
+const code=document.getElementById("code").value
+
+confirmationResult.confirm(code)
+
+.then(result=>{
+
+alert("Bienvenido "+result.user.phoneNumber)
+
+})
+
+.catch(()=>alert("Código incorrecto"))
+
+}
+
+
+
+function logout(){
+
+auth.signOut()
+
+}
+
+
+
+auth.onAuthStateChanged(user=>{
+
+if(user){
+
+document.getElementById('login-box').style.display='none'
+document.getElementById('main-box').style.display='block'
+
+document.getElementById('name').innerText=
+user.displayName || user.phoneNumber
+
+document.getElementById('pfp').src=
+user.photoURL || "https://i.imgur.com/6VBx3io.png"
+
+}
+
+else{
+
+document.getElementById('login-box').style.display='block'
+document.getElementById('main-box').style.display='none'
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
