@@ -36,14 +36,6 @@ margin-bottom:15px;
 text-shadow:0 0 10px #4facfe;
 }
 
-input{
-width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:8px;
-border:none;
-}
-
 .btn{
 background:#fff;
 color:#000;
@@ -56,6 +48,14 @@ width:100%;
 margin-top:10px;
 }
 
+input{
+width:100%;
+padding:10px;
+border-radius:8px;
+border:none;
+margin-top:10px;
+}
+
 .content{display:none}
 
 .user-img{
@@ -65,8 +65,8 @@ margin-bottom:10px;
 border:2px solid #4facfe;
 }
 </style>
-
 </head>
+
 <body>
 
 <div class="card">
@@ -99,6 +99,8 @@ ENVIAR CÓDIGO
 VERIFICAR CÓDIGO
 </button>
 
+<br><br>
+
 <div id="recaptcha-container"></div>
 
 </div>
@@ -129,6 +131,7 @@ Cerrar Sesión
 
 </div>
 
+
 <script>
 
 const firebaseConfig={
@@ -146,16 +149,12 @@ const auth=firebase.auth()
 
 const provider=new firebase.auth.GoogleAuthProvider()
 
-
-
 function loginGoogle(){
-
 auth.signInWithPopup(provider)
 .catch(e=>alert("Error: "+e.message))
-
 }
 
-
+window.onload=function(){
 
 window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier(
 'recaptcha-container',
@@ -163,26 +162,25 @@ window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier(
 auth
 )
 
+recaptchaVerifier.render()
 
+}
 
 function sendCode(){
 
 const phone=document.getElementById("phone").value
+const appVerifier=window.recaptchaVerifier
 
-auth.signInWithPhoneNumber(phone,window.recaptchaVerifier)
+auth.signInWithPhoneNumber(phone,appVerifier)
 
 .then(result=>{
-
 window.confirmationResult=result
 alert("Código enviado")
-
 })
 
 .catch(e=>alert(e.message))
 
 }
-
-
 
 function verifyCode(){
 
@@ -191,24 +189,16 @@ const code=document.getElementById("code").value
 confirmationResult.confirm(code)
 
 .then(result=>{
-
 alert("Bienvenido "+result.user.phoneNumber)
-
 })
 
 .catch(()=>alert("Código incorrecto"))
 
 }
 
-
-
 function logout(){
-
 auth.signOut()
-
 }
-
-
 
 auth.onAuthStateChanged(user=>{
 
