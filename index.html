@@ -3,78 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrizZapp | Perfil</title>
+    <title>CrizZapp | Cloud Profile</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #020406; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-top: 20px; }
+        body { font-family: sans-serif; background: #0b141a; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* BARRA SUPERIOR */
-        .navbar { width: 100%; max-width: 400px; display: flex; justify-content: flex-end; align-items: center; padding: 10px 20px; position: absolute; top: 0; z-index: 10; }
-        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #4facfe; cursor: pointer; }
-        .btn-nav { background: #4facfe; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .nav { width: 100%; max-width: 450px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .user-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; }
 
-        .card { background: #0d1218; border-radius: 20px; border: 1px solid #1f2937; width: 360px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 40px; }
-
-        .header { position: relative; height: 140px; background: #1a222c; }
-        .banner { width: 100%; height: 100%; object-fit: cover; }
-        .pfp-container { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
-        .pfp { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #0d1218; object-fit: cover; background: #1a222c; }
-
-        .body { padding: 55px 20px 25px; text-align: center; }
-        #display-name { font-size: 1.6rem; font-weight: bold; color: #4facfe; margin-bottom: 20px; }
-
-        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
-        .btn-edit { background: #1f2937; color: white; }
-        .btn-share { background: #4facfe; color: white; }
+        .card { background: #111b21; width: 90%; max-width: 380px; border-radius: 20px; overflow: hidden; border: 1px solid #222e35; margin-top: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         
-        #editor { display: none; padding: 20px; background: #161d26; border-top: 1px solid #1f2937; text-align: left; }
-        input[type="text"] { width: 100%; background: #0d1218; border: 1px solid #334155; padding: 10px; border-radius: 6px; color: #fff; margin-top: 5px; margin-bottom: 10px; }
+        .banner-area { height: 140px; background: #202c33; position: relative; }
+        .banner-img { width: 100%; height: 100%; object-fit: cover; }
+        .pfp-area { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
+        .pfp-img { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #111b21; background: #202c33; object-fit: cover; }
+
+        .content { padding: 55px 20px 25px; text-align: center; }
+        .name { font-size: 1.5rem; font-weight: bold; color: #e9edef; margin-bottom: 20px; }
+
+        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; transition: 0.2s; }
+        .btn-edit { background: #202c33; color: #00a884; }
+        .btn-share { background: #00a884; color: white; }
+        .btn-save { background: #00e676; color: black; }
+
+        #editor { display: none; padding: 20px; text-align: left; background: #1f2c33; border-radius: 15px; margin: 10px; }
+        label { font-size: 11px; color: #8696a0; display: block; margin-top: 10px; }
+        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: none; border-radius: 8px; color: white; margin-top: 5px; }
+        input[type="file"] { margin-top: 5px; font-size: 12px; color: #00a884; }
 
         .hidden { display: none !important; }
+        .loading { padding: 50px; text-align: center; color: #00a884; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <button id="nav-login" class="btn-nav" onclick="login()">INICIAR SESIÓN</button>
-        <div id="nav-user" class="hidden" onclick="window.location.search = ''">
-            <img id="nav-pfp" src="" class="mini-pfp">
+    <div class="nav">
+        <h2 style="color: #00a884;">CrizZapp</h2>
+        <div id="auth-section">
+            <button id="login-btn" class="btn" style="width: auto; padding: 8px 15px;" onclick="login()">Entrar</button>
+            <img id="my-mini-pfp" class="user-circle hidden" onclick="goMyProfile()">
         </div>
     </div>
 
-    <div class="card">
-        <div class="header">
-            <img id="view-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000" class="banner">
-            <div class="pfp-container">
-                <img id="view-pfp" src="" class="pfp">
+    <div id="loader" class="loading hidden">Cargando perfil...</div>
+
+    <div id="profile-card" class="card hidden">
+        <div class="banner-area">
+            <img id="v-banner" src="" class="banner-img">
+            <div class="pfp-area">
+                <img id="v-pfp" src="" class="pfp-img">
             </div>
         </div>
-
-        <div class="body">
-            <div id="display-name">Usuario</div>
+        <div class="content">
+            <div id="v-name" class="name">Usuario</div>
             
-            <div class="btn-group" id="main-actions">
-                <button id="btn-edit-toggle" class="btn btn-edit hidden" onclick="toggleEditor()">EDITAR</button>
-                <button class="btn btn-share" onclick="shareProfile()">COMPARTIR PERFIL</button>
+            <div id="owner-actions" class="hidden">
+                <button class="btn btn-edit" onclick="toggleEditor()">EDITAR PERFIL</button>
+                <button class="btn btn-share" onclick="share()">COMPARTIR PERFIL</button>
             </div>
 
             <div id="editor">
-                <label style="font-size: 0.7rem; color: #8696a0;">NOMBRE/APODO</label>
-                <input type="text" id="edit-name">
-                <label style="font-size: 0.7rem; color: #8696a0;">URL FOTO PERFIL</label>
-                <input type="text" id="edit-pfp">
-                <label style="font-size: 0.7rem; color: #8696a0;">URL BANNER</label>
-                <input type="text" id="edit-banner">
-                <button class="btn btn-share" style="width:100%" onclick="saveData()">GUARDAR</button>
+                <label>APODO</label>
+                <input type="text" id="i-name">
+                <label>FOTO DE PERFIL</label>
+                <input type="file" id="f-pfp" accept="image/*">
+                <label>BANNER</label>
+                <input type="file" id="f-banner" accept="image/*">
+                <button class="btn btn-save" style="margin-top:20px;" onclick="uploadData()">GUARDAR EN LA NUBE</button>
             </div>
         </div>
     </div>
 
     <script>
+        // TU CONFIGURACIÓN (Asegúrate de tener Firestore activado en tu consola Firebase)
         const firebaseConfig = {
             apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
             authDomain: "ingresa-dfec2.firebaseapp.com",
@@ -85,64 +90,81 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
 
         function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-
-        function toggleEditor() {
+        function goMyProfile() { window.location.href = window.location.pathname; }
+        function toggleEditor() { 
             const ed = document.getElementById('editor');
             ed.style.display = (ed.style.display === 'block') ? 'none' : 'block';
         }
 
-        function saveData() {
-            localStorage.setItem('c_name', document.getElementById('edit-name').value);
-            localStorage.setItem('c_pfp', document.getElementById('edit-pfp').value);
-            localStorage.setItem('c_banner', document.getElementById('edit-banner').value);
+        // Convierte imagen a Base64 para guardarla como string en Firestore
+        const toBase64 = file => new Promise((res) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => res(reader.result);
+        });
+
+        async function uploadData() {
+            const user = auth.currentUser;
+            if(!user) return;
+
+            const name = document.getElementById('i-name').value;
+            const pfpFile = document.getElementById('f-pfp').files[0];
+            const bannerFile = document.getElementById('f-banner').files[0];
+
+            let data = { name: name || user.displayName };
+            if(pfpFile) data.pfp = await toBase64(pfpFile);
+            if(bannerFile) data.banner = await toBase64(bannerFile);
+
+            await db.collection("users").doc(user.uid).set(data, {merge: true});
+            alert("¡Perfil actualizado!");
             location.reload();
         }
 
-        function shareProfile() {
-            const name = encodeURIComponent(document.getElementById('display-name').innerText);
-            const pfp = encodeURIComponent(document.getElementById('view-pfp').src);
-            const banner = encodeURIComponent(document.getElementById('view-banner').src);
-            
-            // Crea un link con los datos incluidos
-            const shareLink = `${window.location.origin}${window.location.pathname}?u=${name}&p=${pfp}&b=${banner}`;
-            
-            navigator.clipboard.writeText(shareLink);
-            alert("¡Link único de tu perfil copiado!");
+        function share() {
+            const link = `${window.location.origin}${window.location.pathname}?id=${auth.currentUser.uid}`;
+            navigator.clipboard.writeText(link);
+            alert("¡Link de perfil copiado!");
         }
 
-        // LÓGICA DE CARGA (¿Soy yo o es un perfil compartido?)
-        auth.onAuthStateChanged(user => {
+        // LÓGICA DE CARGA
+        auth.onAuthStateChanged(async (user) => {
             const params = new URLSearchParams(window.location.search);
-            const sharedName = params.get('u');
-            
+            const viewId = params.get('id');
+
             if (user) {
-                document.getElementById('nav-login').classList.add('hidden');
-                document.getElementById('nav-user').classList.remove('hidden');
-                document.getElementById('nav-pfp').src = user.photoURL;
-                document.getElementById('btn-edit-toggle').classList.remove('hidden');
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('my-mini-pfp').classList.remove('hidden');
+                document.getElementById('my-mini-pfp').src = user.photoURL;
             }
 
-            if (sharedName) {
-                // VIENDO PERFIL COMPARTIDO
-                document.getElementById('display-name').innerText = sharedName;
-                document.getElementById('view-pfp').src = params.get('p');
-                document.getElementById('view-banner').src = params.get('b');
-                document.getElementById('btn-edit-toggle').classList.add('hidden'); // No puedes editar el perfil de otro
-            } else if (user) {
-                // MI PROPIO PERFIL
-                const name = localStorage.getItem('c_name') || user.displayName;
-                const pfp = localStorage.getItem('c_pfp') || user.photoURL;
-                const banner = localStorage.getItem('c_banner') || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000";
-                
-                document.getElementById('display-name').innerText = name;
-                document.getElementById('view-pfp').src = pfp;
-                document.getElementById('view-banner').src = banner;
+            let targetId = viewId || (user ? user.uid : null);
 
-                document.getElementById('edit-name').value = name;
-                document.getElementById('edit-pfp').value = pfp;
-                document.getElementById('edit-banner').value = banner;
+            if (targetId) {
+                document.getElementById('loader').classList.remove('hidden');
+                const doc = await db.collection("users").doc(targetId).get();
+                
+                if (doc.exists) {
+                    const d = doc.data();
+                    document.getElementById('v-name').innerText = d.name;
+                    document.getElementById('v-pfp').src = d.pfp || "";
+                    document.getElementById('v-banner').src = d.banner || "";
+                    document.getElementById('i-name').value = d.name;
+                } else if (user && targetId === user.uid) {
+                    // Perfil nuevo para el usuario logueado
+                    document.getElementById('v-name').innerText = user.displayName;
+                    document.getElementById('v-pfp').src = user.photoURL;
+                    document.getElementById('i-name').value = user.displayName;
+                }
+
+                if (user && targetId === user.uid) {
+                    document.getElementById('owner-actions').classList.remove('hidden');
+                }
+
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('profile-card').classList.remove('hidden');
             }
         });
     </script>
