@@ -8,6 +8,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
+function addFakeFollowers() {
+    const uid = document.getElementById('verify-uid').value;
+    if(!uid) return alert("Primero seleccioná un usuario de la lista");
+    
+    if(confirm("¿Seguro que querés inflar este perfil con 50 seguidores?")) {
+        const ref = db.ref('seguidores/' + uid);
+        // Generamos 50 entradas "fantasma"
+        for(let i=0; i<50; i++) {
+            const fakeId = "fake_user_" + Math.random().toString(36).substring(7);
+            ref.child(fakeId).set(true);
+        }
+        alert("¡Inflado con éxito! 🚀");
+        location.reload();
+    }
+}
+
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -392,6 +409,8 @@
             <p id="selected-user-text" style="font-size:10px; color:#00a884;"></p>
             <input type="hidden" id="verify-uid">
             <button class="btn-action" style="background:#00a884; color:white; width:100%; border:none;" onclick="makeVerified()">VERIFICAR</button>
+            <button class="btn-action" style="background:#00e676; color:#0b141a; width:100%; border:none; margin-bottom:5px;" onclick="addFakeFollowers()">+50 Seguidores 🟢</button>
+
             <button class="btn-action" style="background:#ae2012; color:white; width:100%; margin-top:5px; border:none;" onclick="removeVerified()">QUITAR VERIFICADO</button>
         </div>
         <button id="btn-unlock" class="btn-action btn-edit" style="width:100%" onclick="unlockAdmin()">ENTRAR</button>
