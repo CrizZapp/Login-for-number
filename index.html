@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrizZapp | Social</title>
+    <title>CrizZapp | Social Fix</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -16,88 +16,112 @@
             color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
         }
 
-        header { width: 100%; max-width: 450px; background: #202c33; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884; position: sticky; top:0; z-index:100; }
-        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; }
+        header { width: 100%; max-width: 500px; background: #202c33; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884; position: sticky; top:0; z-index:100; }
+        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00a884; object-fit: cover; }
         
-        .card { background: #111b21; width: 90%; max-width: 400px; border-radius: 20px; border: 1px solid #00a884; overflow: hidden; margin-top: 20px; }
-        .banner-h { position: relative; height: 120px; background: #2a3942; }
+        /* CONTENEDOR DE PERFIL CORREGIDO */
+        .profile-card { 
+            background: #111b21; width: 95%; max-width: 420px; border-radius: 15px; 
+            border: 1px solid #00a884; overflow: hidden; margin-top: 20px; position: relative;
+        }
+
+        .banner-container { width: 100%; height: 140px; background: #2a3942; overflow: hidden; }
         #v-banner { width: 100%; height: 100%; object-fit: cover; }
-        .pfp-h { position: absolute; bottom: -40px; left: 20px; }
-        #v-pfp { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #111b21; object-fit: cover; }
 
-        .info { padding: 45px 20px 20px; }
-        #v-name { font-size: 1.4rem; font-weight: bold; color: #00a884; }
-        #v-bio { color: #8696a0; font-size: 14px; margin: 10px 0; }
-        .stats { display: flex; gap: 20px; margin-top: 10px; font-size: 13px; color: #00e676; font-weight: bold; }
+        .pfp-container { 
+            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 100px; z-index: 5;
+        }
+        #v-pfp { 
+            width: 100%; height: 100%; border-radius: 50%; 
+            border: 4px solid #111b21; object-fit: cover; background: #202c33;
+        }
 
-        .btn { padding: 10px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
-        .btn-follow { background: #00a884; color: white; }
-        .btn-edit { background: #202c33; color: white; border: 1px solid #00a884; }
+        .info-section { padding: 60px 20px 20px; text-align: center; }
+        #v-name { font-size: 1.5rem; font-weight: bold; color: #00a884; margin-bottom: 5px; }
+        #v-bio { color: #8696a0; font-size: 14px; margin-bottom: 15px; }
+        
+        .stats-row { display: flex; justify-content: center; gap: 15px; font-size: 13px; color: #00e676; margin-bottom: 15px; }
 
-        /* POSTS */
-        .posts-container { width: 90%; max-width: 400px; margin-top: 20px; padding-bottom: 80px; }
-        .post { background: #111b21; border: 1px solid #2a3942; border-radius: 15px; margin-bottom: 20px; overflow: hidden; }
-        .post img { width: 100%; display: block; }
-        .post-desc { padding: 12px; font-size: 14px; }
-        .post-footer { padding: 10px; border-top: 1px solid #2a3942; display: flex; align-items: center; gap: 10px; }
-        .like-btn { cursor: pointer; color: #ff3b3b; font-size: 18px; }
+        .btn { padding: 12px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn-edit { background: transparent; color: white; border: 1px solid #00a884; }
+        .btn-primary { background: #00a884; color: white; }
 
-        /* FLOATING ACTION BUTTON (+) */
-        .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: #00a884; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: none; }
+        /* POSTS GRID */
+        .posts-grid { width: 95%; max-width: 420px; margin-top: 20px; padding-bottom: 100px; }
+        .post-item { background: #111b21; border-radius: 10px; margin-bottom: 15px; border: 1px solid #2a3942; overflow: hidden; }
+        .post-item img { width: 100%; display: block; }
+        .post-caption { padding: 10px; font-size: 14px; color: #e9edef; }
+
+        /* FAB */
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: #00a884; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 50; }
 
         /* MODALES */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-        .modal-cont { background: #111b21; padding: 20px; border-radius: 15px; border: 1px solid #00a884; width: 100%; max-width: 350px; }
-        input, textarea { width: 100%; padding: 10px; background: #2a3942; border: none; border-radius: 8px; color: white; margin-top: 10px; outline: none; }
-        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #111b21; padding: 20px; border-radius: 15px; border: 1px solid #00a884; width: 100%; max-width: 380px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; background: #2a3942; border: none; border-radius: 8px; color: white; margin: 10px 0; outline: none; }
+        .file-label { display: block; font-size: 12px; color: #00a884; margin: 10px 0 5px; font-weight: bold; }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="font-weight: bold; color:#00a884; cursor:pointer;" onclick="location.search=''">CrizZapp</div>
-        <div id="nav-user"></div>
+        <div style="font-weight: bold; color:#00a884; font-size: 1.2rem;">CrizZapp</div>
+        <div id="nav-right"></div>
     </header>
 
-    <div class="card">
-        <div class="banner-h"><img id="v-banner" src=""></div>
-        <div class="pfp-h"><img id="v-pfp" src=""></div>
-        <div class="info">
-            <div id="v-name">Cargando...</div>
-            <div id="v-bio">Sin biografía aún.</div>
-            <div class="stats">
-                <span id="count-followers">0 Seguidores</span>
+    <div class="profile-card">
+        <div class="banner-container">
+            <img id="v-banner" src="">
+        </div>
+        <div class="pfp-container">
+            <img id="v-pfp" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+        </div>
+        <div class="info-section">
+            <div id="v-name">Nombre</div>
+            <div id="v-bio">Bio aquí...</div>
+            <div class="stats-row">
+                <span id="followers-count">0 Seguidores</span>
             </div>
-            <button id="btn-follow-action" class="btn btn-follow hidden" onclick="toggleFollow()">SEGUIR</button>
-            <button id="btn-edit-trigger" class="btn btn-edit hidden" onclick="openModal('modal-edit')">EDITAR PERFIL</button>
+            
+            <div id="action-buttons">
+                <button id="btn-edit-open" class="btn btn-edit hidden" onclick="openModal('modal-edit')">EDITAR PERFIL</button>
+                <button id="btn-follow" class="btn btn-primary hidden" onclick="handleFollow()">SEGUIR</button>
+            </div>
         </div>
     </div>
 
-    <div class="posts-container" id="posts-list">
-        </div>
+    <div class="posts-grid" id="posts-feed"></div>
 
-    <button id="add-post-btn" class="fab hidden" onclick="openModal('modal-post')">+</button>
+    <button id="btn-add-post" class="fab hidden" onclick="openModal('modal-post')">+</button>
 
     <div id="modal-edit" class="modal">
-        <div class="modal-cont">
-            <h3>Editar Perfil</h3>
-            <input type="text" id="edit-name" placeholder="Apodo">
-            <textarea id="edit-bio" placeholder="Tu biografía..."></textarea>
-            <label style="font-size:10px; color:#8696a0;">FOTO PERFIL</label>
-            <input type="file" id="f-pfp">
-            <button class="btn btn-follow" onclick="saveProfile()">GUARDAR</button>
-            <button class="btn btn-edit" onclick="closeModals()">CANCELAR</button>
+        <div class="modal-content">
+            <h3 style="color:#00a884">Ajustes de Perfil</h3>
+            <input type="text" id="in-name" placeholder="Tu Apodo">
+            <textarea id="in-bio" placeholder="Tu descripción..."></textarea>
+            
+            <label class="file-label">FOTO DE PERFIL</label>
+            <input type="file" id="in-pfp" accept="image/*">
+            
+            <label class="file-label">IMAGEN DE BANNER</label>
+            <input type="file" id="in-banner" accept="image/*">
+            
+            <button class="btn btn-primary" onclick="updateProfile()">GUARDAR TODO</button>
+            <button class="btn" style="color:#8696a0" onclick="closeModal()">Cerrar</button>
         </div>
     </div>
 
     <div id="modal-post" class="modal">
-        <div class="modal-cont">
-            <h3>Nuevo Post</h3>
-            <input type="file" id="post-file" accept="image/*">
-            <textarea id="post-desc" placeholder="Descripción de la foto..."></textarea>
-            <button class="btn btn-follow" onclick="uploadPost()">PUBLICAR</button>
-            <button class="btn btn-edit" onclick="closeModals()">CERRAR</button>
+        <div class="modal-content">
+            <h3 style="color:#00a884">Nueva Publicación</h3>
+            <label class="file-label">SELECCIONAR FOTO</label>
+            <input type="file" id="in-post-img" accept="image/*">
+            <textarea id="in-post-desc" placeholder="¿Qué estás pensando?"></textarea>
+            <button class="btn btn-primary" onclick="createPost()">PUBLICAR</button>
+            <button class="btn" style="color:#8696a0" onclick="closeModal()">Cancelar</button>
         </div>
     </div>
 
@@ -116,103 +140,63 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    const params = new URLSearchParams(window.location.search);
-    const viewId = params.get('id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const profileId = urlParams.get('id');
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
 
-    const toBase64 = f => new Promise(res => {
+    const readerBase64 = f => new Promise(res => {
         const r = new FileReader();
         r.onload = e => res(e.target.result);
         r.readAsDataURL(f);
     });
 
-    // LÓGICA DE SEGUIMIENTO
-    function toggleFollow() {
+    async function updateProfile() {
         const user = auth.currentUser;
-        if(!user) return alert("Inicia sesión para seguir");
-        const refFollow = db.ref(`seguidores/${viewId}/${user.uid}`);
-        refFollow.get().then(snap => {
-            if(snap.exists()) refFollow.remove();
-            else refFollow.set(true);
-        });
-    }
-
-    async function saveProfile() {
-        const u = auth.currentUser;
-        const pFile = document.getElementById('f-pfp').files[0];
-        let d = { name: document.getElementById('edit-name').value, bio: document.getElementById('edit-bio').value };
-        if(pFile) d.pfp = await toBase64(pFile);
-        db.ref('perfiles_google/'+u.uid).update(d).then(() => location.reload());
-    }
-
-    async function uploadPost() {
-        const u = auth.currentUser;
-        const file = document.getElementById('post-file').files[0];
-        const desc = document.getElementById('post-desc').value;
-        if(!file) return alert("Selecciona una foto");
+        const pFile = document.getElementById('in-pfp').files[0];
+        const bFile = document.getElementById('in-banner').files[0];
         
-        const img = await toBase64(file);
-        db.ref(`posts/${u.uid}`).push({ img, desc, likes: 0, date: Date.now() }).then(() => location.reload());
+        let up = { 
+            name: document.getElementById('in-name').value, 
+            bio: document.getElementById('in-bio').value 
+        };
+        
+        if(pFile) up.pfp = await readerBase64(pFile);
+        if(bFile) up.banner = await readerBase64(bFile);
+
+        db.ref('perfiles_google/'+user.uid).update(up).then(() => location.reload());
+    }
+
+    async function createPost() {
+        const user = auth.currentUser;
+        const file = document.getElementById('in-post-img').files[0];
+        const desc = document.getElementById('in-post-desc').value;
+        if(!file) return alert("Sube una imagen");
+
+        const b64 = await readerBase64(file);
+        db.ref('posts/'+user.uid).push({ img: b64, desc, time: Date.now() }).then(() => location.reload());
+    }
+
+    function handleFollow() {
+        const me = auth.currentUser;
+        if(!me) return alert("Logueate primero");
+        const ref = db.ref(`seguidores/${profileId}/${me.uid}`);
+        ref.get().then(s => s.exists() ? ref.remove() : ref.set(true));
     }
 
     auth.onAuthStateChanged(user => {
-        const target = viewId || (user ? user.uid : null);
+        const activeId = profileId || (user ? user.uid : null);
+        
         if(user) {
-            document.getElementById('nav-user').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="location.search=''">`;
-            if(target === user.uid) document.getElementById('add-post-btn').classList.remove('hidden');
+            document.getElementById('nav-right').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="window.location.search=''">`;
+            if(activeId === user.uid) document.getElementById('btn-add-post').classList.remove('hidden');
         }
 
-        if(target) {
-            // Cargar Perfil
-            db.ref('perfiles_google/'+target).on('value', snap => {
+        if(activeId) {
+            // Datos Perfil
+            db.ref('perfiles_google/'+activeId).on('value', snap => {
                 const d = snap.val() || {};
                 document.getElementById('v-name').innerText = d.name || "Usuario";
-                document.getElementById('v-bio').innerText = d.bio || "Sin biografía.";
-                document.getElementById('v-pfp').src = d.pfp || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                if(target === user?.uid) {
-                    document.getElementById('btn-edit-trigger').classList.remove('hidden');
-                    document.getElementById('edit-name').value = d.name || "";
-                    document.getElementById('edit-bio').value = d.bio || "";
-                } else if(user) {
-                    document.getElementById('btn-follow-action').classList.remove('hidden');
-                }
-            });
-
-            // Cargar Seguidores
-            db.ref(`seguidores/${target}`).on('value', snap => {
-                const count = snap.numChildren();
-                document.getElementById('count-followers').innerText = `${count} Seguidores`;
-                if(user && snap.hasChild(user.uid)) {
-                    document.getElementById('btn-follow-action').innerText = "SIGUIENDO";
-                    document.getElementById('btn-follow-action').style.background = "#202c33";
-                } else {
-                    document.getElementById('btn-follow-action').innerText = "SEGUIR";
-                    document.getElementById('btn-follow-action').style.background = "#00a884";
-                }
-            });
-
-            // Cargar Posts
-            db.ref(`posts/${target}`).on('value', snap => {
-                const list = document.getElementById('posts-list');
-                list.innerHTML = "";
-                snap.forEach(child => {
-                    const p = child.val();
-                    list.innerHTML = `
-                        <div class="post">
-                            <img src="${p.img}">
-                            <div class="post-desc">${p.desc}</div>
-                            <div class="post-footer">
-                                <span class="like-btn" onclick="alert('Like guardado')">❤️</span> 
-                                <span style="font-size:12px;">${p.likes} likes</span>
-                            </div>
-                        </div>
-                    ` + list.innerHTML;
-                });
-            });
-        }
-    });
-</script>
-</body>
-</html>
+                document.getElementById('v-bio').innerText = d.bio || "Sin bio...";
+                document.getElementById('v-pfp').src = d.pfp || "
