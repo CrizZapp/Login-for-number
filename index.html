@@ -3,83 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrizZapp | Cloud Profile</title>
+    <title>CrizZapp | Perfil</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: #0b141a; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
-        .nav { width: 100%; max-width: 450px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .user-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b141a; color: #e9edef; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-        .card { background: #111b21; width: 90%; max-width: 380px; border-radius: 20px; overflow: hidden; border: 1px solid #222e35; margin-top: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        /* HEADER */
+        header { width: 100%; max-width: 500px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #202c33; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .logo { color: #00a884; font-weight: bold; font-size: 1.2rem; }
+        .nav-user { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; background: #111b21; }
+
+        /* TARJETA */
+        .card { background: #111b21; width: 100%; max-width: 400px; margin-top: 20px; overflow: hidden; position: relative; border-radius: 0 0 15px 15px; }
         
-        .banner-area { height: 140px; background: #202c33; position: relative; }
+        .banner-box { height: 150px; background: #2a3942; position: relative; }
         .banner-img { width: 100%; height: 100%; object-fit: cover; }
-        .pfp-area { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
-        .pfp-img { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #111b21; background: #202c33; object-fit: cover; }
+        
+        .pfp-box { position: absolute; bottom: -50px; left: 20px; }
+        .pfp-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #111b21; background: #202c33; object-fit: cover; }
 
-        .content { padding: 55px 20px 25px; text-align: center; }
-        .name { font-size: 1.5rem; font-weight: bold; color: #e9edef; margin-bottom: 20px; }
+        .info-box { padding: 60px 20px 20px; }
+        #v-name { font-size: 1.8rem; font-weight: bold; margin-bottom: 15px; }
 
-        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; transition: 0.2s; }
-        .btn-edit { background: #202c33; color: #00a884; }
+        /* ACCIONES */
+        .actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-edit { background: #202c33; color: #00a884; border: 1px solid #00a884; }
         .btn-share { background: #00a884; color: white; }
-        .btn-save { background: #00e676; color: black; }
 
-        #editor { display: none; padding: 20px; text-align: left; background: #1f2c33; border-radius: 15px; margin: 10px; }
-        label { font-size: 11px; color: #8696a0; display: block; margin-top: 10px; }
-        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: none; border-radius: 8px; color: white; margin-top: 5px; }
-        input[type="file"] { margin-top: 5px; font-size: 12px; color: #00a884; }
+        /* EDITOR */
+        #editor-ui { display: none; background: #1f2c33; padding: 20px; border-radius: 15px; margin: 15px; border: 1px solid #2a3942; }
+        .field { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; color: #8696a0; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: 1px solid #3b4a54; border-radius: 5px; color: white; outline: none; }
+        .btn-save { background: #00e676; color: #0b141a; width: 100%; margin-top: 10px; }
 
         .hidden { display: none !important; }
-        .loading { padding: 50px; text-align: center; color: #00a884; font-weight: bold; }
+        #status-msg { margin-top: 50px; color: #00a884; }
     </style>
 </head>
 <body>
 
-    <div class="nav">
-        <h2 style="color: #00a884;">CrizZapp</h2>
-        <div id="auth-section">
-            <button id="login-btn" class="btn" style="width: auto; padding: 8px 15px;" onclick="login()">Entrar</button>
-            <img id="my-mini-pfp" class="user-circle hidden" onclick="goMyProfile()">
+    <header>
+        <div class="logo">CrizZapp</div>
+        <div id="auth-ui">
+            <button id="btn-login" class="btn" style="padding: 5px 15px;" onclick="login()">LOGIN</button>
+            <img id="nav-pfp" class="nav-user hidden" onclick="goHome()">
         </div>
-    </div>
+    </header>
 
-    <div id="loader" class="loading hidden">Cargando perfil...</div>
+    <div id="status-msg">Cargando datos...</div>
 
-    <div id="profile-card" class="card hidden">
-        <div class="banner-area">
-            <img id="v-banner" src="" class="banner-img">
-            <div class="pfp-area">
-                <img id="v-pfp" src="" class="pfp-img">
+    <div id="main-view" class="hidden" style="width: 100%; max-width: 400px;">
+        <div class="card">
+            <div class="banner-box">
+                <img id="v-banner" src="" class="banner-img">
+                <div class="pfp-box">
+                    <img id="v-pfp" src="" class="pfp-img">
+                </div>
+            </div>
+            <div class="info-box">
+                <div id="v-name">Nombre</div>
+                <div id="owner-tools" class="actions hidden">
+                    <button class="btn btn-edit" onclick="showEditor()">EDITAR</button>
+                    <button class="btn btn-share" onclick="copyLink()">COMPARTIR</button>
+                </div>
             </div>
         </div>
-        <div class="content">
-            <div id="v-name" class="name">Usuario</div>
-            
-            <div id="owner-actions" class="hidden">
-                <button class="btn btn-edit" onclick="toggleEditor()">EDITAR PERFIL</button>
-                <button class="btn btn-share" onclick="share()">COMPARTIR PERFIL</button>
-            </div>
 
-            <div id="editor">
+        <div id="editor-ui">
+            <h3 style="margin-bottom: 15px; color: #00a884;">Configurar Perfil</h3>
+            <div class="field">
                 <label>APODO</label>
-                <input type="text" id="i-name">
-                <label>FOTO DE PERFIL</label>
-                <input type="file" id="f-pfp" accept="image/*">
-                <label>BANNER</label>
-                <input type="file" id="f-banner" accept="image/*">
-                <button class="btn btn-save" style="margin-top:20px;" onclick="uploadData()">GUARDAR EN LA NUBE</button>
+                <input type="text" id="edit-name">
             </div>
+            <div class="field">
+                <label>FOTO PERFIL</label>
+                <input type="file" id="file-pfp" accept="image/*">
+            </div>
+            <div class="field">
+                <label>BANNER</label>
+                <input type="file" id="file-banner" accept="image/*">
+            </div>
+            <button class="btn btn-save" onclick="upload()">GUARDAR CAMBIOS</button>
+            <button class="btn" style="background:transparent; color:#8696a0;" onclick="showEditor()">Cancelar</button>
         </div>
     </div>
 
     <script>
-        // TU CONFIGURACIÓN (Asegúrate de tener Firestore activado en tu consola Firebase)
         const firebaseConfig = {
             apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
             authDomain: "ingresa-dfec2.firebaseapp.com",
@@ -93,78 +108,67 @@
         const db = firebase.firestore();
 
         function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-        function goMyProfile() { window.location.href = window.location.pathname; }
-        function toggleEditor() { 
-            const ed = document.getElementById('editor');
-            ed.style.display = (ed.style.display === 'block') ? 'none' : 'block';
+        function goHome() { window.location.href = window.location.pathname; }
+        function showEditor() {
+            const ui = document.getElementById('editor-ui');
+            ui.style.display = (ui.style.display === 'block') ? 'none' : 'block';
         }
 
-        // Convierte imagen a Base64 para guardarla como string en Firestore
-        const toBase64 = file => new Promise((res) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => res(reader.result);
+        const toBase64 = f => new Promise(res => {
+            const r = new FileReader();
+            r.readAsDataURL(f);
+            r.onload = () => res(r.result);
         });
 
-        async function uploadData() {
-            const user = auth.currentUser;
-            if(!user) return;
+        async function upload() {
+            const u = auth.currentUser;
+            const name = document.getElementById('edit-name').value;
+            const fp = document.getElementById('file-pfp').files[0];
+            const fb = document.getElementById('file-banner').files[0];
 
-            const name = document.getElementById('i-name').value;
-            const pfpFile = document.getElementById('f-pfp').files[0];
-            const bannerFile = document.getElementById('f-banner').files[0];
+            let obj = { name: name || u.displayName };
+            if(fp) obj.pfp = await toBase64(fp);
+            if(fb) obj.banner = await toBase64(fb);
 
-            let data = { name: name || user.displayName };
-            if(pfpFile) data.pfp = await toBase64(pfpFile);
-            if(bannerFile) data.banner = await toBase64(bannerFile);
-
-            await db.collection("users").doc(user.uid).set(data, {merge: true});
-            alert("¡Perfil actualizado!");
+            await db.collection("users").doc(u.uid).set(obj, {merge: true});
             location.reload();
         }
 
-        function share() {
+        function copyLink() {
             const link = `${window.location.origin}${window.location.pathname}?id=${auth.currentUser.uid}`;
             navigator.clipboard.writeText(link);
-            alert("¡Link de perfil copiado!");
+            alert("Link copiado. Pásalo para que vean tu perfil.");
         }
 
-        // LÓGICA DE CARGA
-        auth.onAuthStateChanged(async (user) => {
+        auth.onAuthStateChanged(async user => {
             const params = new URLSearchParams(window.location.search);
             const viewId = params.get('id');
+            const target = viewId || (user ? user.uid : null);
 
             if (user) {
-                document.getElementById('login-btn').classList.add('hidden');
-                document.getElementById('my-mini-pfp').classList.remove('hidden');
-                document.getElementById('my-mini-pfp').src = user.photoURL;
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('nav-pfp').classList.remove('hidden');
+                document.getElementById('nav-pfp').src = user.photoURL;
             }
 
-            let targetId = viewId || (user ? user.uid : null);
-
-            if (targetId) {
-                document.getElementById('loader').classList.remove('hidden');
-                const doc = await db.collection("users").doc(targetId).get();
+            if (target) {
+                const doc = await db.collection("users").doc(target).get();
+                const d = doc.data() || {};
                 
-                if (doc.exists) {
-                    const d = doc.data();
-                    document.getElementById('v-name').innerText = d.name;
-                    document.getElementById('v-pfp').src = d.pfp || "";
-                    document.getElementById('v-banner').src = d.banner || "";
-                    document.getElementById('i-name').value = d.name;
-                } else if (user && targetId === user.uid) {
-                    // Perfil nuevo para el usuario logueado
-                    document.getElementById('v-name').innerText = user.displayName;
-                    document.getElementById('v-pfp').src = user.photoURL;
-                    document.getElementById('i-name').value = user.displayName;
+                // Mostrar datos (Prioridad: Firestore > Google > Default)
+                document.getElementById('v-name').innerText = d.name || (user && target === user.uid ? user.displayName : "Usuario");
+                document.getElementById('v-pfp').src = d.pfp || (user && target === user.uid ? user.photoURL : "https://cdn-icons-png.flaticon.com/512/149/149071.png");
+                document.getElementById('v-banner').src = d.banner || "https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png";
+
+                if (user && target === user.uid) {
+                    document.getElementById('owner-tools').classList.remove('hidden');
+                    document.getElementById('edit-name').value = d.name || user.displayName;
                 }
 
-                if (user && targetId === user.uid) {
-                    document.getElementById('owner-actions').classList.remove('hidden');
-                }
-
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('profile-card').classList.remove('hidden');
+                document.getElementById('status-msg').classList.add('hidden');
+                document.getElementById('main-view').classList.remove('hidden');
+            } else {
+                document.getElementById('status-msg').innerText = "Inicia sesión para ver tu perfil";
             }
         });
     </script>
