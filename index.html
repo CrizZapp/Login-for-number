@@ -1,151 +1,167 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrizZapp | Acceso</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrizZapp | Acceso</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #020406; 
+            color: #fff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
+        .card { 
+            background: #0d1218; 
+            border-radius: 20px; 
+            border: 1px solid #1f2937; 
+            text-align: center; 
+            width: 350px; 
+            overflow: hidden; /* Importante para que el banner no se salga */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-body{
-font-family:sans-serif;
-background:#020406;
-color:#fff;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
+        /* --- SECCIÓN DEL BANNER Y FOTO --- */
+        .profile-header {
+            position: relative;
+            height: 120px;
+            background: #1a222c;
+        }
 
-.card{
-background:#0d1218;
-padding:30px;
-border-radius:15px;
-border:2px solid #4facfe;
-text-align:center;
-width:320px;
-}
+        .banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(45deg, #0f172a, #4facfe);
+        }
 
-h1{
-color:#4facfe;
-margin-bottom:15px;
-text-shadow:0 0 10px #4facfe;
-}
+        .user-img-container {
+            position: absolute;
+            bottom: -40px; /* Baja la foto para que quede a mitad del banner */
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-.btn{
-background:#fff;
-color:#000;
-border:none;
-padding:12px;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer;
-width:100%;
-margin-top:10px;
-}
+        .user-img { 
+            width: 90px; 
+            height: 90px;
+            border-radius: 50%; 
+            border: 4px solid #0d1218; /* Borde del color del fondo para resaltar */
+            background: #0d1218;
+            object-fit: cover;
+        }
 
-input{
-width:100%;
-padding:10px;
-border-radius:8px;
-border:none;
-margin-top:10px;
-}
-</style>
+        /* --- CONTENIDO --- */
+        .profile-body {
+            padding: 55px 25px 25px 25px; /* Padding superior extra para compensar la foto */
+        }
+
+        h1 { color: #4facfe; margin-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 15px rgba(79, 172, 254, 0.4); }
+        .nickname { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .status { color: #00ff88; font-size: 0.85em; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+        .btn { 
+            background: #fff; 
+            color: #000; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: 0.3s;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .btn-panel { background: #4facfe; color: white; margin-top: 10px; }
+
+        .content { display: none; }
+        
+        .logout-link { 
+            margin-top: 20px; 
+            font-size: 0.8em; 
+            color: #ff3d00; 
+            cursor: pointer; 
+            text-decoration: underline;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="card">
+    <div class="card">
+        <div id="main-box" class="content">
+            <div class="profile-header">
+                <img id="banner" src="https://wallpapers.com/images/hd/neon-blue-abstract-digital-art-4k-76v9q8z8i3n9v6z6.jpg" class="banner-img">
+                <div class="user-img-container">
+                    <img id="pfp" src="" class="user-img">
+                </div>
+            </div>
 
-<h1>CrizZapp</h1>
+            <div class="profile-body">
+                <h3 id="name" class="nickname"></h3>
+                <p class="status"><span>●</span> Acceso Autorizado</p>
+                
+                <button onclick="location.href='panel.html'" class="btn btn-panel">IR AL PANEL</button>
+                <p onclick="logout()" class="logout-link">Cerrar Sesión</p>
+            </div>
+        </div>
 
-<p style="margin-bottom:20px;color:#8696a0;">
-Inicia sesión para continuar
-</p>
+        <div id="login-box" style="padding: 40px 30px;">
+            <h1>CrizZapp</h1>
+            <p style="margin-bottom: 25px; color: #8696a0;">Inicia sesión con Google para acceder a tu perfil</p>
+            <button class="btn" onclick="login()">ENTRAR CON GOOGLE</button>
+        </div>
+    </div>
 
-<button class="btn" onclick="loginGoogle()">
-ENTRAR CON GOOGLE
-</button>
+    <script>
+        // Tu configuración de Firebase (Se mantiene igual)
+        const firebaseConfig = {
+            apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
+            authDomain: "ingresa-dfec2.firebaseapp.com",
+            projectId: "ingresa-dfec2",
+            storageBucket: "ingresa-dfec2.appspot.com",
+            messagingSenderId: "441882283200",
+            appId: "1:441882283200:web:8067df85facc2d67d77125"
+        };
 
-<p style="margin:15px 0;color:#8696a0;">
-o continuar con teléfono
-</p>
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
 
-<input id="phone" placeholder="+598XXXXXXXX">
+        function login() {
+            auth.signInWithPopup(provider).catch(e => alert("Error: " + e.message));
+        }
 
-<button class="btn" onclick="sendCode()">
-ENVIAR CÓDIGO
-</button>
+        function logout() {
+            auth.signOut();
+        }
 
-<input id="code" placeholder="Código SMS">
+        auth.onAuthStateChanged(user => {
+            const loginBox = document.getElementById('login-box');
+            const mainBox = document.getElementById('main-box');
 
-<button class="btn" onclick="verifyCode()">
-VERIFICAR CÓDIGO
-</button>
-
-<!-- CAPTCHA (AQUÍ VA) -->
-<div id="recaptcha-container" style="margin-top:15px;"></div>
-
-</div>
-
-<script>
-
-const firebaseConfig={
-apiKey:"AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
-authDomain:"ingresa-dfec2.firebaseapp.com",
-projectId:"ingresa-dfec2",
-storageBucket:"ingresa-dfec2.appspot.com",
-messagingSenderId:"441882283200",
-appId:"1:441882283200:web:8067df85facc2d67d77125"
-}
-
-firebase.initializeApp(firebaseConfig)
-const auth = firebase.auth()
-
-const provider = new firebase.auth.GoogleAuthProvider()
-
-function loginGoogle(){
-auth.signInWithPopup(provider)
-}
-
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-'recaptcha-container',
-{size:'normal'},
-auth
-)
-
-recaptchaVerifier.render()
-
-function sendCode(){
-
-const phone = document.getElementById("phone").value
-const appVerifier = window.recaptchaVerifier
-
-auth.signInWithPhoneNumber(phone, appVerifier)
-.then(result=>{
-window.confirmationResult = result
-alert("Código enviado")
-})
-
-}
-
-function verifyCode(){
-
-const code = document.getElementById("code").value
-
-confirmationResult.confirm(code)
-.then(result=>{
-alert("Bienvenido "+result.user.phoneNumber)
-})
-
-}
-
-</script>
-
+            if (user) {
+                loginBox.style.display = 'none';
+                mainBox.style.display = 'block';
+                document.getElementById('name').innerText = user.displayName;
+                document.getElementById('pfp').src = user.photoURL;
+                
+                // Opcional: Si quieres que el banner también sea dinámico (puedes guardarlo en Firestore después)
+                // document.getElementById('banner').src = "URL_DE_TU_BANNER";
+            } else {
+                loginBox.style.display = 'block';
+                mainBox.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
