@@ -21,7 +21,8 @@
             width: 100%; max-width: 450px; background: #202c33; padding: 10px 15px; 
             display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884;
         }
-        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; }
+        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; background: #111b21; }
+        .btn-nav-login { background: #00a884; color: white; border: none; padding: 5px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 12px; }
 
         /* TARJETA */
         .card { 
@@ -38,46 +39,44 @@
         .info { padding: 55px 20px 25px; text-align: center; }
         #v-name { font-size: 1.5rem; font-weight: bold; color: #00a884; margin-bottom: 20px; }
 
-        /* BOTONES */
         .btn { padding: 12px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; }
         .btn-edit { background: #202c33; color: white; border: 1px solid #00a884; }
         .btn-share { background: #00a884; color: white; }
 
-        /* EDITOR */
-        #editor { display: none; text-align: left; background: #1f2c33; padding: 15px; border-radius: 15px; }
-        label { font-size: 11px; color: #8696a0; font-weight: bold; }
-        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: none; border-radius: 8px; color: white; margin: 5px 0 15px; }
-        input[type="file"] { font-size: 12px; color: #00a884; margin-top: 5px; }
-
-        #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        #editor { display: none; text-align: left; background: #1f2c33; padding: 15px; border-radius: 15px; border: 1px solid #00a884; margin-top: 15px; }
+        label { font-size: 11px; color: #8696a0; font-weight: bold; display: block; margin-top: 10px; }
+        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: none; border-radius: 8px; color: white; margin-top: 5px; outline: none; }
+        
+        #login-overlay { position: fixed; inset: 0; background: #111b21; z-index: 1000; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
+    <div id="login-overlay" class="hidden">
         <div style="text-align: center; background: #202c33; padding: 40px; border-radius: 20px; border: 1px solid #00a884;">
             <h1 style="color:#00a884; margin-bottom: 20px;">CrizZapp</h1>
             <button class="btn btn-share" onclick="login()">ENTRAR CON GOOGLE</button>
         </div>
     </div>
 
-    <header id="nav" class="hidden">
-        <div style="font-weight: bold; color:#00a884;">CrizZapp Perfil</div>
-        <img id="my-nav-pfp" class="mini-pfp" onclick="verMiPerfil()" title="Volver a mi perfil">
+    <header>
+        <div style="font-weight: bold; color:#00a884; cursor: pointer;" onclick="verMiPerfil()">CrizZapp</div>
+        <div id="nav-actions">
+            </div>
     </header>
 
-    <div id="profile-card" class="card hidden">
+    <div id="profile-card" class="card">
         <div class="banner-h">
             <img id="v-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000">
             <div class="pfp-h">
-                <img id="v-pfp" src="">
+                <img id="v-pfp" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
             </div>
         </div>
         <div class="info">
-            <div id="v-name">Nombre</div>
+            <div id="v-name">Cargando...</div>
             
-            <div id="owner-actions" class="hidden">
+            <div id="owner-tools" class="hidden">
                 <button class="btn btn-edit" onclick="toggleEdit()">EDITAR PERFIL</button>
                 <button class="btn btn-share" onclick="compartir()">COMPARTIR PERFIL</button>
             </div>
@@ -86,10 +85,10 @@
                 <label>APODO</label>
                 <input type="text" id="i-name">
                 <label>FOTO PERFIL</label>
-                <input type="file" id="f-pfp" accept="image/*" style="display:block; margin-bottom:15px;">
+                <input type="file" id="f-pfp" accept="image/*">
                 <label>BANNER</label>
-                <input type="file" id="f-banner" accept="image/*" style="display:block; margin-bottom:15px;">
-                <button class="btn btn-share" style="background:#00e676; color:black;" onclick="guardar()">GUARDAR CAMBIOS</button>
+                <input type="file" id="f-banner" accept="image/*">
+                <button class="btn btn-share" style="background:#00e676; color:black; margin-top:15px;" onclick="guardar()">GUARDAR CAMBIOS</button>
             </div>
         </div>
     </div>
@@ -110,9 +109,7 @@
     const db = firebase.database();
 
     function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-    
-    function verMiPerfil() { window.location.href = window.location.pathname; }
-
+    function verMiPerfil() { window.location.search = ""; }
     function toggleEdit() {
         const ed = document.getElementById('editor');
         ed.style.display = (ed.style.display === 'block') ? 'none' : 'block';
@@ -126,6 +123,7 @@
 
     async function guardar() {
         const user = auth.currentUser;
+        if(!user) return;
         const name = document.getElementById('i-name').value;
         const pFile = document.getElementById('f-pfp').files[0];
         const bFile = document.getElementById('f-banner').files[0];
@@ -135,7 +133,7 @@
         if(bFile) data.banner = await toBase64(bFile);
 
         db.ref('perfiles_google/' + user.uid).update(data).then(() => {
-            alert("Perfil guardado");
+            alert("¡Perfil actualizado!");
             location.reload();
         });
     }
@@ -143,32 +141,46 @@
     function compartir() {
         const link = window.location.origin + window.location.pathname + "?id=" + auth.currentUser.uid;
         navigator.clipboard.writeText(link);
-        alert("¡Link copiado!");
+        alert("¡Link de perfil copiado!");
     }
 
+    // LÓGICA PRINCIPAL
+    const params = new URLSearchParams(window.location.search);
+    const viewId = params.get('id');
+
     auth.onAuthStateChanged(user => {
-        const params = new URLSearchParams(window.location.search);
-        const viewId = params.get('id');
-
+        const navActions = document.getElementById('nav-actions');
+        
+        // Actualizar Navbar
         if (user) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('nav').classList.remove('hidden');
-            document.getElementById('profile-card').classList.remove('hidden');
-            document.getElementById('my-nav-pfp').src = user.photoURL;
+            navActions.innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="verMiPerfil()">`;
+            document.getElementById('login-overlay').classList.add('hidden');
+        } else {
+            navActions.innerHTML = `<button class="btn-nav-login" onclick="login()">LOGIN</button>`;
+            // Si no hay ID y no hay usuario, mostrar login forzado
+            if (!viewId) {
+                document.getElementById('login-overlay').classList.remove('hidden');
+            }
+        }
 
-            const target = viewId || user.uid;
+        const target = viewId || (user ? user.uid : null);
 
+        if (target) {
             db.ref('perfiles_google/' + target).on('value', snap => {
                 const d = snap.val() || {};
-                document.getElementById('v-name').innerText = d.name || (target === user.uid ? user.displayName : "Usuario");
-                document.getElementById('v-pfp').src = d.pfp || (target === user.uid ? user.photoURL : "");
+                
+                // Mostrar datos
+                document.getElementById('v-name').innerText = d.name || "Usuario";
+                document.getElementById('v-pfp').src = d.pfp || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 if(d.banner) document.getElementById('v-banner').src = d.banner;
 
-                if (target === user.uid) {
-                    document.getElementById('owner-actions').classList.remove('hidden');
+                // Si soy el dueño, mostrar herramientas
+                if (user && target === user.uid) {
+                    document.getElementById('owner-tools').classList.remove('hidden');
                     document.getElementById('i-name').value = d.name || user.displayName;
                 } else {
-                    document.getElementById('owner-actions').classList.add('hidden');
+                    document.getElementById('owner-tools').classList.add('hidden');
+                    document.getElementById('editor').style.display = 'none';
                 }
             });
         }
