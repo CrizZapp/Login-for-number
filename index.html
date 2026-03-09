@@ -260,11 +260,27 @@
                 document.getElementById('profile-btns').innerHTML = btns;
             });
 
+                       // --- REEMPLAZO PARA SEGUIDORES ---
             db.ref(`seguidores/${target}`).on('value', s => {
                 document.getElementById('f-count').innerText = `${s.numChildren()} Seguidores`;
                 const b = document.getElementById('f-btn');
-                if(b && user && s.hasChild(user.uid)) { b.innerText = "SIGUIENDO"; b.style.background = "#202c33"; b.onclick = () => db.ref(`seguidores/${target}/${user.uid}`).remove(); }
+                
+                if(b && user) {
+                    if(s.hasChild(user.uid)) {
+                        // YA LO SIGUES
+                        b.innerText = "SIGUIENDO";
+                        b.style.background = "#202c33"; 
+                        b.onclick = () => db.ref(`seguidores/${target}/${user.uid}`).remove();
+                    } else {
+                        // NO LO SIGUES
+                        b.innerText = "SEGUIR";
+                        b.style.background = "#00a884";
+                        b.onclick = () => db.ref(`seguidores/${target}/${user.uid}`).set(true);
+                    }
+                }
             });
+            // ---------------------------------
+
 
             db.ref('posts/'+target).on('value', snap => {
                 const g = document.getElementById('post-grid'), f = document.getElementById('feed-content');
