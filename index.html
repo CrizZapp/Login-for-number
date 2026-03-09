@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CrizZapp | Fixed</title>
+    <title>CrizZapp | Final</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -19,15 +19,17 @@
         header { width: 100%; height: 60px; background: #202c33; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884; position: sticky; top:0; z-index: 100; }
         .mini-pfp { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #00a884; object-fit: cover; }
 
-        .profile-container { display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; }
-        .profile-card { background: #111b21; width: 95%; max-width: 450px; border-radius: 0 0 20px 20px; border: 1px solid #00a884; border-top: none; overflow: hidden; position: relative; padding-bottom: 20px; }
+        .profile-card { background: #111b21; width: 95%; max-width: 450px; border-radius: 0 0 20px 20px; border: 1px solid #00a884; border-top: none; overflow: hidden; position: relative; margin: 0 auto 20px; padding-bottom: 20px; }
         .banner { height: 130px; background: #2a3942; }
         .banner img { width: 100%; height: 100%; object-fit: cover; }
         .pfp-wrap { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); }
-        .pfp-wrap img { width: 95px; height: 95px; border-radius: 50%; border: 4px solid #111b21; object-fit: cover; background: #202c33; }
+        .pfp-wrap img { width: 95px; height: 95px; border-radius: 50%; border: 4px solid #111b21; object-fit: cover; }
         
         .info { margin-top: 55px; text-align: center; padding: 0 15px; }
+        .name-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .name { font-size: 1.5rem; font-weight: bold; color: #00a884; }
+        .share-p-btn { font-size: 18px; cursor: pointer; color: #00a884; background: rgba(0,168,132,0.1); padding: 5px; border-radius: 50%; }
+        
         .bio { color: #8696a0; font-size: 14px; margin: 8px 0; }
         .stats { color: #00e676; font-size: 13px; font-weight: bold; }
         
@@ -36,10 +38,9 @@
         .btn-follow { background: #00a884; color: white; }
 
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100%; max-width: 500px; margin: 0 auto; padding-bottom: 80px; }
-        .grid-item { aspect-ratio: 1/1; background: #2a3942; overflow: hidden; position: relative; }
+        .grid-item { aspect-ratio: 1/1; background: #2a3942; overflow: hidden; position: relative; cursor: pointer; }
         .grid-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* FEED SCROLL */
         #feed-view { position: fixed; inset: 0; background: black; z-index: 1000; display: none; overflow-y: scroll; scroll-snap-type: y mandatory; }
         .post-fullscreen { height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; align-items: center; justify-content: center; }
         .post-fullscreen img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -61,38 +62,38 @@
         <div id="nav-user"></div>
     </header>
 
-    <div id="profile-view" class="profile-container">
+    <div id="profile-view">
         <div class="profile-card">
             <div class="banner"><img id="v-banner" src=""></div>
             <div class="pfp-wrap"><img id="v-pfp" src=""></div>
             <div class="info">
-                <div id="v-name" class="name">CrizZapp</div>
-                <div id="v-bio" class="bio">Holaaa :D</div>
+                <div class="name-row">
+                    <div id="v-name" class="name">CrizZapp</div>
+                    <span class="share-p-btn" onclick="shareProfile()">🔗</span>
+                </div>
+                <div id="v-bio" class="bio">Cargando...</div>
                 <div class="stats"><span id="f-count">0 Seguidores</span></div>
                 <div id="profile-btns"></div>
             </div>
         </div>
-        <div style="width:100%; text-align:center; padding:15px; color:#00a884; font-weight:bold; border-bottom:1px solid #2a3942;">PUBLICACIONES</div>
+        <div style="width:100%; text-align:center; padding:15px; color:#00a884; font-weight:bold;">PUBLICACIONES</div>
         <div class="grid-container" id="post-grid"></div>
     </div>
 
     <div id="feed-view">
-        <div style="position:fixed; top:20px; left:20px; z-index:1100; font-size:25px;" onclick="document.getElementById('feed-view').style.display='none'">←</div>
+        <div style="position:fixed; top:20px; left:20px; z-index:1100; font-size:25px; background:rgba(0,0,0,0.5); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('feed-view').style.display='none'">←</div>
         <div id="feed-content"></div>
     </div>
 
     <button id="add-btn" class="fab hidden" onclick="openM('m-post')">+</button>
 
     <div id="m-edit" class="modal"><div class="modal-c">
-        <h3 style="color:#00a884">Ajustes de Perfil</h3>
+        <h3 style="color:#00a884">Editar Perfil</h3>
         <input type="text" id="ed-name" placeholder="Tu Apodo">
         <textarea id="ed-bio" placeholder="Biografía..."></textarea>
-        <label style="font-size:11px; color:#8696a0">FOTO DE PERFIL</label>
-        <input type="file" id="ed-pfp" accept="image/*">
-        <label style="font-size:11px; color:#8696a0">BANNER</label>
-        <input type="file" id="ed-banner" accept="image/*">
+        <input type="file" id="ed-pfp" accept="image/*"><input type="file" id="ed-banner" accept="image/*">
         <button class="btn-action btn-follow" style="width:100%" onclick="saveProfile()">GUARDAR</button>
-        <button class="btn-action" style="width:100%; background:transparent; color:white;" onclick="closeM()">Cerrar</button>
+        <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Cerrar</button>
     </div></div>
 
     <div id="m-post" class="modal"><div class="modal-c">
@@ -100,7 +101,7 @@
         <input type="file" id="post-img" accept="image/*">
         <textarea id="post-desc" placeholder="Descripción..."></textarea>
         <button class="btn-action btn-follow" style="width:100%" onclick="uploadPost()">PUBLICAR</button>
-        <button class="btn-action" style="width:100%; background:transparent; color:white;" onclick="closeM()">Cerrar</button>
+        <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Cerrar</button>
     </div></div>
 
 <script>
@@ -119,6 +120,7 @@
     const db = firebase.database();
     const params = new URLSearchParams(window.location.search);
     const viewId = params.get('id');
+    const postIdParam = params.get('post');
 
     function openM(id) { document.getElementById(id).style.display='flex'; }
     function closeM() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
@@ -129,34 +131,44 @@
         r.readAsDataURL(f);
     });
 
+    function shareProfile() {
+        navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid));
+        alert("Enlace del perfil copiado 👤");
+    }
+
+    function sharePost(pid) {
+        const url = window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid) + "&post=" + pid;
+        navigator.clipboard.writeText(url);
+        alert("Enlace del post copiado 🔗");
+    }
+
+    function toggleLike(pid, owner) {
+        const u = auth.currentUser;
+        if(!u) return alert("Logueate!");
+        const likeRef = db.ref(`posts/${owner}/${pid}/list_likes/${u.uid}`);
+        likeRef.get().then(s => {
+            const ref = db.ref(`posts/${owner}/${pid}/likes`);
+            if(s.exists()) { likeRef.remove(); ref.transaction(c => (c||1)-1); }
+            else { likeRef.set(true); ref.transaction(c => (c||0)+1); }
+        });
+    }
+
     async function saveProfile() {
         const u = auth.currentUser;
-        const pF = document.getElementById('ed-pfp').files[0];
-        const bF = document.getElementById('ed-banner').files[0];
-        let d = { name: document.getElementById('ed-name').value, bio: document.getElementById('ed-bio').value };
-        if(pF) d.pfp = await toBase64(pF);
-        if(bF) d.banner = await toBase64(bF);
+        const d = { name: document.getElementById('ed-name').value, bio: document.getElementById('ed-bio').value };
+        const pf = document.getElementById('ed-pfp').files[0];
+        const bf = document.getElementById('ed-banner').files[0];
+        if(pf) d.pfp = await toBase64(pf);
+        if(bf) d.banner = await toBase64(bf);
         db.ref('perfiles_google/'+u.uid).update(d).then(() => location.reload());
     }
 
     async function uploadPost() {
         const u = auth.currentUser;
         const file = document.getElementById('post-img').files[0];
-        if(!file) return alert("Sube una foto");
+        if(!file) return;
         const b64 = await toBase64(file);
         db.ref('posts/'+u.uid).push({ img: b64, desc: document.getElementById('post-desc').value, likes: 0, time: Date.now() }).then(() => location.reload());
-    }
-
-    function toggleFollow() {
-        const me = auth.currentUser;
-        if(!me) return auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-        const ref = db.ref(`seguidores/${viewId}/${me.uid}`);
-        ref.get().then(s => s.exists() ? ref.remove() : ref.set(true));
-    }
-
-    function shareLink() {
-        navigator.clipboard.writeText(window.location.href);
-        alert("¡Enlace del perfil copiado!");
     }
 
     auth.onAuthStateChanged(user => {
@@ -173,25 +185,12 @@
             db.ref('perfiles_google/'+target).on('value', snap => {
                 const d = snap.val() || {};
                 document.getElementById('v-name').innerText = d.name || "Usuario";
-                document.getElementById('v-bio').innerText = d.bio || "Bio aquí...";
+                document.getElementById('v-bio').innerText = d.bio || "Sin bio";
                 document.getElementById('v-pfp').src = d.pfp || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 document.getElementById('v-banner').src = d.banner || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000";
                 
-                let btns = "";
-                if(user && target === user.uid) {
-                    btns = `<button class="btn-action btn-edit" onclick="openM('m-edit')">EDITAR PERFIL</button>`;
-                    document.getElementById('ed-name').value = d.name || "";
-                    document.getElementById('ed-bio').value = d.bio || "";
-                } else {
-                    btns = `<button id="f-btn" class="btn-action btn-follow" onclick="toggleFollow()">SEGUIR</button>`;
-                }
+                let btns = (user && target === user.uid) ? `<button class="btn-action btn-edit" onclick="openM('m-edit')">EDITAR PERFIL</button>` : `<button id="f-btn" class="btn-action btn-follow" onclick="if(!auth.currentUser){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}else{db.ref('seguidores/'+target+'/'+auth.currentUser.uid).set(true)}">SEGUIR</button>`;
                 document.getElementById('profile-btns').innerHTML = btns;
-            });
-
-            db.ref(`seguidores/${target}`).on('value', s => {
-                document.getElementById('f-count').innerText = `${s.numChildren()} Seguidores`;
-                const b = document.getElementById('f-btn');
-                if(b && user && s.hasChild(user.uid)) { b.innerText = "SIGUIENDO"; b.style.background = "#202c33"; }
             });
 
             db.ref('posts/'+target).on('value', snap => {
@@ -199,23 +198,23 @@
                 const f = document.getElementById('feed-content');
                 g.innerHTML = ""; f.innerHTML = "";
                 snap.forEach(c => {
-                    const p = c.val();
-                    const pid = c.key;
+                    const p = c.val(), pid = c.key;
                     g.innerHTML = `<div class="grid-item" onclick="document.getElementById('feed-view').style.display='block'; document.getElementById('${pid}').scrollIntoView();"><img src="${p.img}"></div>` + g.innerHTML;
                     f.innerHTML = `
-                        <section class="post-fullscreen" id="${pid}">
+                        <div class="post-fullscreen" id="${pid}">
                             <img src="${p.img}">
                             <div class="post-actions">
-                                <div class="action-btn" onclick="db.ref('posts/${target}/${pid}/likes').transaction(c => (c||0)+1)">👍</div>
-                                <div class="action-btn" onclick="shareLink()">🔗</div>
+                                <div class="action-btn" onclick="toggleLike('${pid}', '${target}')">👍</div>
+                                <div style="font-weight:bold">${p.likes || 0}</div>
+                                <div class="action-btn" onclick="sharePost('${pid}')">🔗</div>
                             </div>
                             <div class="post-data">
                                 <div style="font-weight:bold; color:#00a884">@CrizZapp</div>
                                 <div style="font-size:14px">${p.desc}</div>
                             </div>
-                        </section>
-                    ` + f.innerHTML;
+                        </div>` + f.innerHTML;
                 });
+                if(postIdParam) { document.getElementById('feed-view').style.display='block'; setTimeout(()=>document.getElementById(postIdParam).scrollIntoView(), 500); }
             });
         }
     });
