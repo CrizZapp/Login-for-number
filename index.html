@@ -269,18 +269,52 @@ function addFakeFollowers() {
     }
 
     async function uploadPost() {
-        const u = auth.currentUser, file = document.getElementById('post-img').files[0];
-        if(!file) return alert("Sube una foto");
-        const b64 = await toBase64(file);
-        db.ref('posts/'+u.uid).push({ img: b64, desc: document.getElementById('post-desc').value, likes: 0, time: Date.now() }).then(() => location.reload());
+        const u = auth.currentUser;
+        if(!u) return alert("Debes iniciar sesión para publicar");
+
+        const fileInput = document.getElementById('post-img');
+        const descInput = document.getElementById('post-desc');
+        const file = fileInput.files[0];
+        
+        if(!file) return alert("Selecciona una imagen primero");
+
+        const btn = document.querySelector('#m-post .btn-follow');
+        const originalText = btn.innerText;
+        btn.innerText = "SUBIENDO...";
+        btn.disabled = true;
+
+        try {
+            const b64 = await toBase64(file);
+            const newPostRef = db.ref('posts/' + u.uid).push(); // Generamos el ID antes
+            
+            await newPostRef.set({
+                img: b64,
+                desc: descInput.value || "",
+                likes: 0,
+                time: Date.now(),
+                uid: u.uid
+            });
+            
+            alert("¡Publicado con éxito! 📸");
+            location.reload(); 
+        } catch (error) {
+            console.error("Error Firebase:", error);
+            alert("Error: " + error.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     }
 
     auth.onAuthStateChanged(user => {
         const target = viewId || (user ? user.uid : null);
         if(user) {
             document.getElementById('nav-user').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="window.location.search=''">`;
-            if(target === user.uid) document.getElementById('add-btn').classList.remove('hidden');
+            // Si el perfil que veo es el mío, muestro el botón de subir
+            if(!viewId || viewId === user.uid) {
+                document.getElementById('add-btn').classList.remove('hidden');
+            }
         } else {
+            document.getElementById('add-btn').classList.add('hidden');
             document.getElementById('nav-user').innerHTML = `<button onclick="auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())" style="background:#00a884; color:white; border:none; padding:7px 12px; border-radius:20px; font-size:10px; font-weight:bold;">ENTRAR</button>`;
         }
 
@@ -411,7 +445,7 @@ function addFakeFollowers() {
             <p id="selected-user-text" style="font-size:10px; color:#00a884;"></p>
             <input type="hidden" id="verify-uid">
             <button class="btn-action" style="background:#00a884; color:white; width:100%; border:none;" onclick="makeVerified()">VERIFICAR</button>
-            <button class="btn-action" style="background:#00e676; color:#0b141a; width:100%; border:none; margin-bottom:5px;" onclick="addFakeFollowers()">+50 Seguidores 🟢</button>
+            <button class="btn-action" style="background:#00e676; color:#0b141a; width:100%; border:none; margin-bottom:5px;" onclick="addFakeFollowers()">+100 Seguidores 🟢</button>
 
             <button class="btn-action" style="background:#ae2012; color:white; width:100%; margin-top:5px; border:none;" onclick="removeVerified()">QUITAR VERIFICADO</button>
         </div>
