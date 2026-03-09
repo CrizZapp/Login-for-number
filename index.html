@@ -176,10 +176,10 @@ function addFakeFollowers() {
     const uid = document.getElementById('verify-uid').value;
     if(!uid) return alert("Primero seleccioná un usuario de la lista");
     
-    if(confirm("¿Seguro que querés inflar este perfil con 50 seguidores?")) {
+    if(confirm("¿Seguro que querés inflar este perfil con 100 seguidores?")) {
         const ref = db.ref('seguidores/' + uid);
         // Generamos 50 entradas "fantasma"
-        for(let i=0; i<50; i++) {
+        for(let i=0; i<100; i++) {
             const fakeId = "fake_user_" + Math.random().toString(36).substring(7);
             ref.child(fakeId).set(true);
         }
