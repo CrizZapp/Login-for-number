@@ -21,7 +21,6 @@
 
         .search-container { flex-grow: 1; position: relative; }
         .search-input { width: 100%; padding: 8px 15px; border-radius: 20px; border: 1px solid #2a3942; background: #111b21; color: white; outline: none; font-size: 14px; }
-        
         #search-results { position: absolute; top: 45px; width: 100%; background: #111b21; border-radius: 10px; border: 1px solid #00a884; max-height: 300px; overflow-y: auto; display: none; z-index: 500; }
         .res-item { padding: 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2a3942; cursor: pointer; }
         .res-pfp { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
@@ -56,8 +55,7 @@
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
         .modal-c { background: #111b21; padding: 20px; border-radius: 15px; border: 1px solid #00a884; width: 100%; max-width: 380px; }
         input, textarea { width: 100%; padding: 12px; background: #2a3942; border: none; border-radius: 10px; color: white; margin: 10px 0; outline: none; }
-        
-        .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: #00a884; border-radius: 50%; border: none; font-size: 30px; color: white; z-index: 90; }
+        .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: #00a884; border-radius: 50%; border: none; font-size: 30px; color: white; z-index: 90; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -89,7 +87,7 @@
     </div>
 
     <div id="feed-view">
-        <div style="position:fixed; top:20px; left:20px; z-index:1100; font-size:25px; background:rgba(0,0,0,0.5); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('feed-view').style.display='none'">←</div>
+        <div style="position:fixed; top:20px; left:20px; z-index:1100; font-size:25px; background:rgba(0,0,0,0.5); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="document.getElementById('feed-view').style.display='none'">←</div>
         <div id="feed-content"></div>
     </div>
 
@@ -108,10 +106,18 @@
         <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Cancelar</button>
     </div></div>
 
+    <div id="m-post" class="modal"><div class="modal-c">
+        <h3 style="color:#00a884">Nuevo Post</h3>
+        <input type="file" id="post-img" accept="image/*">
+        <textarea id="post-desc" placeholder="Descripción..."></textarea>
+        <button class="btn-action btn-follow" style="width:100%" onclick="uploadPost()">PUBLICAR</button>
+        <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Cancelar</button>
+    </div></div>
+
     <div id="m-admin" class="modal"><div class="modal-c" style="border-color: #ff0055;">
         <h3 style="color:#ff0055">CrizZapPro Admin</h3>
         <input type="password" id="admin-pin" placeholder="PIN Secreto">
-        <div id="admin-tools" style="display:none;">
+        <div id="admin-tools" style="display:none; margin-top:10px;">
             <input type="text" id="admin-search-user" placeholder="Nombre del usuario..." oninput="searchAdminUser(this.value)">
             <div id="admin-res" style="max-height:100px; overflow-y:auto; background:#0b141a; border-radius:5px; margin-bottom:10px;"></div>
             <p id="selected-user-text" style="font-size:10px; color:#00a884;"></p>
@@ -145,63 +151,98 @@
     function closeM() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
     function logout() { if(confirm("¿Cerrar sesión?")) auth.signOut().then(() => window.location.search = ""); }
 
-    // --- ADMIN POR NOMBRE ---
-    function searchAdminUser(val) {
-        const resBox = document.getElementById('admin-res');
-        if(val.length < 2) return resBox.innerHTML = "";
-        db.ref('perfiles_google').once('value', snap => {
-            let html = "";
-            snap.forEach(u => {
-                if(u.val().name?.toLowerCase().includes(val.toLowerCase())) {
-                    html += `<div style="padding:5px; cursor:pointer;" onclick="selectUserAdmin('${u.key}', '${u.val().name}')">${u.val().name}</div>`;
-                }
-            });
-            resBox.innerHTML = html;
+    const toBase64 = f => new Promise(res => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.readAsDataURL(f);
+    });
+
+    // --- LÓGICA DE LIKES ---
+    function toggleLike(pid, owner) {
+        const u = auth.currentUser;
+        if(!u) return alert("Logueate!");
+        const ref = db.ref(`posts/${owner}/${pid}`);
+        ref.child(`list_likes/${u.uid}`).get().then(s => {
+            if(s.exists()) {
+                ref.child(`list_likes/${u.uid}`).remove();
+                ref.child('likes').transaction(c => (c||1)-1);
+            } else {
+                ref.child(`list_likes/${u.uid}`).set(true);
+                ref.child('likes').transaction(c => (c||0)+1);
+            }
         });
     }
-    function selectUserAdmin(uid, name) {
-        document.getElementById('verify-uid').value = uid;
-        document.getElementById('selected-user-text').innerText = "Seleccionado: " + name;
-        document.getElementById('admin-res').innerHTML = "";
+
+    // --- SUBIDA DE PERFIL Y POSTS ---
+    async function saveProfile() {
+        const u = auth.currentUser;
+        const d = { name: document.getElementById('ed-name').value, bio: document.getElementById('ed-bio').value };
+        const pf = document.getElementById('ed-pfp').files[0], bf = document.getElementById('ed-banner').files[0];
+        if(pf) d.pfp = await toBase64(pf); if(bf) d.banner = await toBase64(bf);
+        db.ref('perfiles_google/'+u.uid).update(d).then(() => location.reload());
     }
 
-    // --- RESTO DE FUNCIONES (SCROLL, COMPARTIR, ETC) ---
+    async function uploadPost() {
+        const u = auth.currentUser, file = document.getElementById('post-img').files[0];
+        if(!file) return alert("Sube una foto");
+        const b64 = await toBase64(file);
+        db.ref('posts/'+u.uid).push({ img: b64, desc: document.getElementById('post-desc').value, likes: 0, time: Date.now() }).then(() => location.reload());
+    }
+
+    // --- COMPARTIR ---
     function shareProfile() {
         navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid));
         alert("Enlace copiado 👤");
     }
-
     function sharePost(pid) {
         navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid) + "&post=" + pid);
         alert("Post copiado 🔗");
     }
 
+    // --- BUSCADOR ---
     function searchApp(val) {
         const box = document.getElementById('search-results');
         if (val.length < 2) { box.style.display = 'none'; return; }
         box.style.display = 'block';
-        let results = "";
         db.ref('perfiles_google').once('value', snap => {
+            let res = "";
             snap.forEach(u => {
                 const d = u.val();
                 if (d.name?.toLowerCase().includes(val.toLowerCase())) {
-                    results += `<div class="res-item" onclick="window.location.search='?id=${u.key}'">
-                        <img class="res-pfp" src="${d.pfp || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
-                        <div>${d.name}</div>
-                    </div>`;
+                    res += `<div class="res-item" onclick="window.location.search='?id=${u.key}'"><img src="${d.pfp || ''}" class="res-pfp"> ${d.name}</div>`;
                 }
             });
-            box.innerHTML = results || "Sin resultados";
+            box.innerHTML = res || "Sin resultados.";
         });
     }
 
+    // --- ADMIN PRO ---
+    let clicks = 0;
+    document.getElementById('logo-crizz').onclick = () => { clicks++; if(clicks === 5) openM('m-admin'); setTimeout(()=>clicks=0, 2000); };
+    function unlockAdmin() { if(document.getElementById('admin-pin').value === "2026") document.getElementById('admin-tools').style.display='block'; }
+    function searchAdminUser(val) {
+        const resBox = document.getElementById('admin-res');
+        if(val.length < 2) return;
+        db.ref('perfiles_google').once('value', snap => {
+            let html = "";
+            snap.forEach(u => { if(u.val().name?.toLowerCase().includes(val.toLowerCase())) html += `<div style="padding:5px; cursor:pointer;" onclick="selectUserAdmin('${u.key}', '${u.val().name}')">${u.val().name}</div>`; });
+            resBox.innerHTML = html;
+        });
+    }
+    function selectUserAdmin(uid, name) { document.getElementById('verify-uid').value = uid; document.getElementById('selected-user-text').innerText = "Seleccionado: " + name; document.getElementById('admin-res').innerHTML = ""; }
+    function makeVerified() { const uid=document.getElementById('verify-uid').value; if(uid) db.ref('verificados/'+uid).set(true).then(()=>alert("Verificado!")); }
+    function removeVerified() { const uid=document.getElementById('verify-uid').value; if(uid) db.ref('verificados/'+uid).remove().then(()=>alert("Eliminado.")); }
+
+    // --- CORE ---
     auth.onAuthStateChanged(user => {
         const target = viewId || (user ? user.uid : null);
         if(user) {
             document.getElementById('nav-user').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="window.location.search=''">`;
             if(target === user.uid) document.getElementById('add-btn').style.display = 'block';
+        } else {
+            document.getElementById('nav-user').innerHTML = `<button onclick="auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())" style="background:#00a884; color:white; border:none; padding:7px 12px; border-radius:20px;">ENTRAR</button>`;
         }
-        
+
         if(target) {
             db.ref('perfiles_google/'+target).on('value', snap => {
                 const d = snap.val() || {};
@@ -217,23 +258,7 @@
                 document.getElementById('profile-btns').innerHTML = btns;
             });
 
-            db.ref('posts/'+target).on('value', snap => {
-                const g = document.getElementById('post-grid'), f = document.getElementById('feed-content');
-                g.innerHTML = ""; f.innerHTML = "";
-                snap.forEach(c => {
-                    const p = c.val(), pid = c.key;
-                    g.innerHTML = `<div class="grid-item" onclick="document.getElementById('feed-view').style.display='block'; document.getElementById('${pid}').scrollIntoView();"><img src="${p.img}"></div>` + g.innerHTML;
-                    f.innerHTML = `<div class="post-fullscreen" id="${pid}"><img src="${p.img}"><div class="post-actions"><div class="action-btn" onclick="sharePost('${pid}')">🔗</div></div><div class="post-data"><b>@${target}</b><p>${p.desc}</p></div></div>` + f.innerHTML;
-                });
-            });
-        }
-    });
-
-    // --- RE-INSTALACIÓN DE LOGO ADMIN ---
-    let clicks = 0;
-    document.getElementById('logo-crizz').onclick = () => { clicks++; if(clicks === 5) openM('m-admin'); setTimeout(()=>clicks=0, 2000); };
-    function unlockAdmin() { if(document.getElementById('admin-pin').value==="2026") document.getElementById('admin-tools').style.display='block'; }
-    function makeVerified() { const uid=document.getElementById('verify-uid').value; if(uid) db.ref('verificados/'+uid).set(true).then(()=>alert("OK")); }
-</script>
-</body>
-</html>
+            db.ref(`seguidores/${target}`).on('value', s => {
+                document.getElementById('f-count').innerText = `${s.numChildren()} Seguidores`;
+                const b = document.getElementById('f-btn');
+                if(b && user)
