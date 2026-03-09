@@ -3,127 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CrizZapp | Full Scroll</title>
+    <title>CrizZapp | Social Pro</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { 
-            height: 100%; width: 100%; overflow: hidden;
-            background-color: #0b141a; font-family: sans-serif; color: white;
+        body { 
+            margin: 0; font-family: sans-serif; background-color: #0b141a; 
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            color: white; overflow-x: hidden;
         }
 
         /* HEADER */
-        header { 
-            position: fixed; top: 0; width: 100%; height: 60px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 15px; z-index: 100;
-        }
-        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00a884; object-fit: cover; }
+        header { width: 100%; height: 60px; background: #202c33; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884; position: sticky; top:0; z-index: 100; }
+        .mini-pfp { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #00a884; object-fit: cover; cursor: pointer; }
 
-        /* CONTENEDOR PRINCIPAL DE SCROLL */
-        #main-container {
-            height: 100vh; width: 100vw;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory; /* EL TRUCO DEL SCROLLING TIKTOK */
-        }
-
-        /* CADA SECCIÓN (PERFIL Y POSTS) */
-        section {
-            height: 100vh; width: 100vw;
-            scroll-snap-align: start;
-            position: relative;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-
-        /* ESTILO DEL PERFIL (PRIMERA PANTALLA) */
-        .profile-screen { background: #111b21; }
-        .banner { position: absolute; top: 0; width: 100%; height: 35%; background: #2a3942; overflow: hidden; }
+        /* PERFIL */
+        .profile-container { display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; }
+        .profile-card { background: #111b21; width: 95%; max-width: 450px; border-radius: 0 0 20px 20px; border: 1px solid #00a884; border-top: none; overflow: hidden; position: relative; padding-bottom: 20px; }
+        .banner { height: 130px; background: #2a3942; }
         .banner img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-info { text-align: center; z-index: 10; margin-top: 50px; }
-        .big-pfp { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #00a884; object-fit: cover; margin-bottom: 15px; }
-        .name { font-size: 1.8rem; font-weight: bold; color: #00a884; }
-        .bio { color: #8696a0; margin: 10px 20px; font-size: 15px; }
-        .stats { color: #00e676; font-weight: bold; margin-bottom: 20px; }
+        .pfp-wrap { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); }
+        .pfp-wrap img { width: 95px; height: 95px; border-radius: 50%; border: 4px solid #111b21; object-fit: cover; background: #202c33; }
+        .info { margin-top: 55px; text-align: center; padding: 0 15px; }
+        .name { font-size: 1.5rem; font-weight: bold; color: #00a884; }
+        .bio { color: #8696a0; font-size: 14px; margin: 8px 0; }
+        .stats { color: #00e676; font-size: 13px; font-weight: bold; }
+        .btn-edit { background: transparent; border: 1px solid #00a884; color: white; padding: 8px 20px; border-radius: 20px; margin-top: 10px; cursor: pointer; font-weight: bold; }
 
-        /* ESTILO DE LOS POSTS (SIGUIENTES PANTALLAS) */
-        .post-screen { background: black; }
-        .post-img { width: 100%; height: 100%; object-fit: contain; }
-        
-        .post-overlay {
-            position: absolute; bottom: 80px; left: 15px; right: 70px;
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.8);
-        }
-        .post-desc { font-size: 16px; margin-top: 5px; }
+        /* CUADRÍCULA DE PORTADAS (TIPO TIKTOK) */
+        .tabs-line { width: 100%; max-width: 500px; display: flex; justify-content: center; border-bottom: 1px solid #2a3942; margin-top: 10px; }
+        .tab-icon { padding: 10px 40px; border-bottom: 2px solid #00a884; color: #00a884; font-size: 20px; }
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100%; max-width: 500px; margin: 0 auto; padding-bottom: 80px; }
+        .grid-item { aspect-ratio: 1/1; background: #2a3942; overflow: hidden; cursor: pointer; position: relative; }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; }
+        .grid-likes { position: absolute; bottom: 5px; left: 5px; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 2px black; }
 
-        /* BOTONES DE ACCIÓN LADO DERECHO */
-        .side-actions {
-            position: absolute; right: 10px; bottom: 100px;
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
-        }
-        .action-item { text-align: center; }
-        .btn-icon { 
-            width: 45px; height: 45px; background: rgba(255,255,255,0.1); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; cursor: pointer;
-        }
+        /* FEED DE SCROLL (FULL SCREEN) */
+        #feed-view { position: fixed; inset: 0; background: black; z-index: 1000; display: none; overflow-y: scroll; scroll-snap-type: y mandatory; }
+        .post-fullscreen { height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; align-items: center; justify-content: center; }
+        .post-fullscreen img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .post-data { position: absolute; bottom: 30px; left: 15px; right: 80px; text-shadow: 1px 1px 5px black; }
+        .post-actions { position: absolute; right: 15px; bottom: 100px; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        .action-btn { background: rgba(255,255,255,0.15); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+        .back-btn { position: absolute; top: 20px; left: 20px; font-size: 25px; z-index: 1100; cursor: pointer; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
 
-        /* BOTÓN + FLOTANTE */
-        .fab { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 50px; height: 50px; background: #00a884; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; color: white; border: none; z-index: 200;
-        }
+        /* FAB */
+        .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: #00a884; border-radius: 50%; border: none; font-size: 30px; color: white; z-index: 90; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-        /* MODALES */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
         .modal-c { background: #111b21; padding: 20px; border-radius: 15px; border: 1px solid #00a884; width: 100%; max-width: 360px; }
         input, textarea { width: 100%; padding: 12px; background: #2a3942; border: none; border-radius: 10px; color: white; margin: 10px 0; outline: none; }
-
+        
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <header>
+    <header id="main-header">
         <div style="font-weight: bold; color:#00a884; font-size: 1.2rem;">CrizZapp</div>
-        <div id="nav-user"></div>
+        <div id="nav-right"></div>
     </header>
 
-    <div id="main-container">
-        <section class="profile-screen">
+    <div id="profile-view" class="profile-container">
+        <div class="profile-card">
             <div class="banner"><img id="v-banner" src=""></div>
-            <div class="profile-info">
-                <img id="v-pfp" class="big-pfp" src="">
+            <div class="pfp-wrap"><img id="v-pfp" src=""></div>
+            <div class="info">
                 <div id="v-name" class="name">Cargando...</div>
                 <div id="v-bio" class="bio">...</div>
                 <div class="stats"><span id="f-count">0 Seguidores</span></div>
                 <div id="profile-btns"></div>
             </div>
-            <div style="position: absolute; bottom: 20px; font-size: 12px; color: #00a884;">Desliza hacia arriba para ver posts ↑</div>
-        </section>
+        </div>
+        <div class="tabs-line"><div class="tab-icon">|||</div></div>
+        <div class="grid-container" id="post-grid"></div>
+    </div>
 
-        <div id="dynamic-posts"></div>
+    <div id="feed-view">
+        <div class="back-btn" onclick="closeFeed()">←</div>
+        <div id="feed-content"></div>
     </div>
 
     <button id="add-btn" class="fab hidden" onclick="openM('m-post')">+</button>
 
-    <div id="m-post" class="modal">
-        <div class="modal-c">
-            <h3 style="color:#00a884">Nuevo Post</h3>
-            <input type="file" id="post-img-file" accept="image/*">
-            <textarea id="post-desc-in" placeholder="¿Qué onda?"></textarea>
-            <button style="width:100%; padding:10px; background:#00a884; color:white; border:none; border-radius:20px;" onclick="uploadPost()">PUBLICAR</button>
-            <button style="width:100%; padding:10px; background:transparent; color:white; border:none; margin-top:10px;" onclick="closeM()">Cerrar</button>
-        </div>
-    </div>
+    <div id="m-post" class="modal"><div class="modal-c">
+        <h3 style="color:#00a884">Nuevo Post</h3>
+        <input type="file" id="in-img" accept="image/*">
+        <textarea id="in-desc" placeholder="Descripción..."></textarea>
+        <button class="btn-edit" style="background:#00a884; width:100%" onclick="uploadPost()">PUBLICAR</button>
+        <button class="btn-edit" style="border:none; width:100%" onclick="closeM()">Cancelar</button>
+    </div></div>
 
 <script>
-    // Configuración Firebase (La misma que usás vos)
     const firebaseConfig = {
         apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
         authDomain: "ingresa-dfec2.firebaseapp.com",
@@ -142,6 +116,12 @@
 
     function openM(id) { document.getElementById(id).style.display = 'flex'; }
     function closeM() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+    
+    function openFeed(postId) {
+        document.getElementById('feed-view').style.display = 'block';
+        document.getElementById(postId).scrollIntoView();
+    }
+    function closeFeed() { document.getElementById('feed-view').style.display = 'none'; }
 
     const toBase64 = f => new Promise(res => {
         const r = new FileReader();
@@ -151,63 +131,83 @@
 
     async function uploadPost() {
         const u = auth.currentUser;
-        const file = document.getElementById('post-img-file').files[0];
-        const desc = document.getElementById('post-desc-in').value;
+        const file = document.getElementById('in-img').files[0];
+        const desc = document.getElementById('in-desc').value;
         if(!file) return alert("Sube una foto");
         const b64 = await toBase64(file);
         db.ref('posts/'+u.uid).push({ img: b64, desc, likes: 0, time: Date.now() }).then(() => location.reload());
     }
 
+    // LIKE ÚNICO: Solo permite un like por usuario
     function darLike(postId, ownerId) {
         const user = auth.currentUser;
-        if(!user) return alert("Logueate!");
-        const postRef = db.ref(`posts/${ownerId}/${postId}/likes`);
-        postRef.transaction(c => (c || 0) + 1);
+        if(!user) return alert("Logueate primero");
+        const likeRef = db.ref(`posts/${ownerId}/${postId}/list_likes/${user.uid}`);
+        
+        likeRef.get().then(s => {
+            const postRef = db.ref(`posts/${ownerId}/${postId}/likes`);
+            if(s.exists()) {
+                likeRef.remove();
+                postRef.transaction(c => (c || 1) - 1);
+            } else {
+                likeRef.set(true);
+                postRef.transaction(c => (c || 0) + 1);
+            }
+        });
     }
 
     auth.onAuthStateChanged(user => {
         const target = viewId || (user ? user.uid : null);
-        
         if(user) {
-            document.getElementById('nav-user').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="window.location.search=''">`;
+            document.getElementById('nav-right').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="window.location.search=''">`;
             if(target === user.uid) document.getElementById('add-btn').classList.remove('hidden');
         }
 
         if(target) {
-            // Datos del Perfil
+            // Datos Perfil
             db.ref('perfiles_google/'+target).on('value', snap => {
                 const d = snap.val() || {};
                 document.getElementById('v-name').innerText = d.name || "Usuario";
                 document.getElementById('v-bio').innerText = d.bio || "Holaaa :D";
                 document.getElementById('v-pfp').src = d.pfp || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 document.getElementById('v-banner').src = d.banner || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000";
+                
+                if(user && target === user.uid) {
+                    document.getElementById('profile-btns').innerHTML = `<button class="btn-edit" onclick="alert('Pronto podrás editar!')">EDITAR PERFIL</button>`;
+                }
             });
 
-            // CARGA DE POSTS CON SCROLLING TIPO TIKTOK
+            // CARGA DE GRID Y FEED
             db.ref('posts/'+target).on('value', snap => {
-                const cont = document.getElementById('dynamic-posts');
-                cont.innerHTML = "";
-                snap.forEach(c => {
-                    const p = c.val();
-                    const pid = c.key;
-                    cont.innerHTML = `
-                        <section class="post-screen">
-                            <img class="post-img" src="${p.img}">
-                            <div class="side-actions">
-                                <div class="action-item">
-                                    <div class="btn-icon" onclick="darLike('${pid}', '${target}')">👍</div>
-                                    <div style="font-size:12px; margin-top:5px;">${p.likes || 0}</div>
-                                </div>
-                                <div class="action-item">
-                                    <div class="btn-icon" onclick="alert('Link copiado')">🔗</div>
-                                </div>
+                const grid = document.getElementById('post-grid');
+                const feed = document.getElementById('feed-content');
+                grid.innerHTML = ""; feed.innerHTML = "";
+                
+                let postsArray = [];
+                snap.forEach(c => { postsArray.unshift({id: c.key, ...c.val()}); });
+
+                postsArray.forEach(p => {
+                    // 1. Cuadrícula (Portadas)
+                    grid.innerHTML += `
+                        <div class="grid-item" onclick="openFeed('${p.id}')">
+                            <img src="${p.img}">
+                            <div class="grid-likes">▶ ${p.likes || 0}</div>
+                        </div>`;
+
+                    // 2. Feed Scroll (Pantalla completa)
+                    feed.innerHTML += `
+                        <div class="post-fullscreen" id="${p.id}">
+                            <img src="${p.img}">
+                            <div class="post-actions">
+                                <div class="action-btn" onclick="darLike('${p.id}', '${target}')">👍</div>
+                                <div style="font-weight:bold">${p.likes || 0}</div>
+                                <div class="action-btn">🔗</div>
                             </div>
-                            <div class="post-overlay">
-                                <div style="font-weight:bold; color:#00a884;">@${document.getElementById('v-name').innerText}</div>
-                                <div class="post-desc">${p.desc}</div>
+                            <div class="post-data">
+                                <div style="font-weight:bold; color:#00a884">@${document.getElementById('v-name').innerText}</div>
+                                <div style="font-size:14px; margin-top:5px;">${p.desc}</div>
                             </div>
-                        </section>
-                    ` + cont.innerHTML;
+                        </div>`;
                 });
             });
         }
