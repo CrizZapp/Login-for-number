@@ -199,4 +199,47 @@
                 const d = snap.val() || {};
                 document.getElementById('v-name').innerText = d.name || "Usuario";
                 document.getElementById('v-bio').innerText = d.bio || "Sin bio...";
-                document.getElementById('v-pfp').src = d.pfp || "
+                document.getElementById('v-pfp').src = d.pfp || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                document.getElementById('v-banner').src = d.banner || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000";
+                
+                if(user && activeId === user.uid) {
+                    document.getElementById('btn-edit-open').classList.remove('hidden');
+                    document.getElementById('in-name').value = d.name || "";
+                    document.getElementById('in-bio').value = d.bio || "";
+                } else if(user) {
+                    document.getElementById('btn-follow').classList.remove('hidden');
+                }
+            });
+
+            // Seguidores
+            db.ref(`seguidores/${activeId}`).on('value', s => {
+                document.getElementById('followers-count').innerText = `${s.numChildren()} Seguidores`;
+                const btn = document.getElementById('btn-follow');
+                if(user && s.hasChild(user.uid)) {
+                    btn.innerText = "SIGUIENDO";
+                    btn.style.background = "#202c33";
+                } else {
+                    btn.innerText = "SEGUIR";
+                    btn.style.background = "#00a884";
+                }
+            });
+
+            // Posts
+            db.ref('posts/'+activeId).on('value', snap => {
+                const feed = document.getElementById('posts-feed');
+                feed.innerHTML = "";
+                snap.forEach(child => {
+                    const p = child.val();
+                    feed.innerHTML = `
+                        <div class="post-item">
+                            <img src="${p.img}">
+                            <div class="post-caption">${p.desc}</div>
+                        </div>
+                    ` + feed.innerHTML;
+                });
+            });
+        }
+    });
+</script>
+</body>
+</html>
