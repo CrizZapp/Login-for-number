@@ -4,173 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CrizZapp | Perfil</title>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0b141a; color: #e9edef; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            background-color: #0b141a; 
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-        /* HEADER */
-        header { width: 100%; max-width: 500px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: #202c33; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .logo { color: #00a884; font-weight: bold; font-size: 1.2rem; }
-        .nav-user { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; background: #111b21; }
+        .card { 
+            background: #111b21; 
+            width: 350px; 
+            border-radius: 20px; 
+            border: 1px solid #00a884; 
+            overflow: hidden; 
+            box-shadow: 0 0 20px rgba(0, 168, 132, 0.3);
+            position: relative;
+        }
 
-        /* TARJETA */
-        .card { background: #111b21; width: 100%; max-width: 400px; margin-top: 20px; overflow: hidden; position: relative; border-radius: 0 0 15px 15px; }
+        /* BANNER Y FOTO */
+        .header-perfil { position: relative; height: 130px; background: #202c33; }
+        #v-banner { width: 100%; height: 100%; object-fit: cover; }
         
-        .banner-box { height: 150px; background: #2a3942; position: relative; }
-        .banner-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .pfp-box { position: absolute; bottom: -50px; left: 20px; }
-        .pfp-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #111b21; background: #202c33; object-fit: cover; }
+        .pfp-cont { 
+            position: absolute; 
+            bottom: -45px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+        }
+        #v-pfp { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            border: 4px solid #111b21; 
+            background: #2a3942;
+            object-fit: cover;
+        }
 
-        .info-box { padding: 60px 20px 20px; }
-        #v-name { font-size: 1.8rem; font-weight: bold; margin-bottom: 15px; }
+        /* CONTENIDO */
+        .body-perfil { padding: 55px 20px 20px; text-align: center; }
+        #v-name { font-size: 1.6rem; font-weight: bold; color: #00a884; text-shadow: 0 0 10px rgba(0, 168, 132, 0.5); margin-bottom: 20px; }
 
-        /* ACCIONES */
-        .actions { display: flex; gap: 10px; margin-top: 10px; }
-        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-edit { background: #202c33; color: #00a884; border: 1px solid #00a884; }
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 25px; 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+        .btn-edit { background: #202c33; color: white; border: 1px solid #00a884; }
         .btn-share { background: #00a884; color: white; }
+        .btn-save { background: #00e676; color: black; margin-top: 10px; }
 
-        /* EDITOR */
-        #editor-ui { display: none; background: #1f2c33; padding: 20px; border-radius: 15px; margin: 15px; border: 1px solid #2a3942; }
-        .field { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #8696a0; margin-bottom: 5px; }
-        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: 1px solid #3b4a54; border-radius: 5px; color: white; outline: none; }
-        .btn-save { background: #00e676; color: #0b141a; width: 100%; margin-top: 10px; }
+        /* EDITOR OCULTO */
+        #editor { display: none; padding: 15px; background: #1f2c33; text-align: left; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 10px; 
+            border-radius: 10px; 
+            border: none; 
+            background: #2a3942; 
+            color: white; 
+            margin: 5px 0 15px;
+            outline: none;
+        }
+        label { font-size: 12px; color: #8696a0; font-weight: bold; }
 
-        .hidden { display: none !important; }
-        #status-msg { margin-top: 50px; color: #00a884; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">CrizZapp</div>
-        <div id="auth-ui">
-            <button id="btn-login" class="btn" style="padding: 5px 15px;" onclick="login()">LOGIN</button>
-            <img id="nav-pfp" class="nav-user hidden" onclick="goHome()">
-        </div>
-    </header>
-
-    <div id="status-msg">Cargando datos...</div>
-
-    <div id="main-view" class="hidden" style="width: 100%; max-width: 400px;">
-        <div class="card">
-            <div class="banner-box">
-                <img id="v-banner" src="" class="banner-img">
-                <div class="pfp-box">
-                    <img id="v-pfp" src="" class="pfp-img">
+    <div class="card">
+        <div id="perfil-view">
+            <div class="header-perfil">
+                <img id="v-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000">
+                <div class="pfp-cont">
+                    <img id="v-pfp" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
                 </div>
             </div>
-            <div class="info-box">
-                <div id="v-name">Nombre</div>
-                <div id="owner-tools" class="actions hidden">
-                    <button class="btn btn-edit" onclick="showEditor()">EDITAR</button>
-                    <button class="btn btn-share" onclick="copyLink()">COMPARTIR</button>
+
+            <div class="body-perfil">
+                <div id="v-name">Cargando...</div>
+                
+                <div id="owner-actions" class="hidden">
+                    <button class="btn btn-edit" onclick="toggleEdit()">EDITAR PERFIL</button>
+                    <button class="btn btn-share" onclick="compartir()">COMPARTIR PERFIL</button>
+                </div>
+
+                <div id="editor">
+                    <label>APODO</label>
+                    <input type="text" id="i-name">
+                    
+                    <label>CAMBIAR FOTO</label>
+                    <input type="file" id="f-pfp" accept="image/*" style="color:#00a884; margin-bottom:15px; font-size:12px;">
+                    
+                    <label>CAMBIAR BANNER</label>
+                    <input type="file" id="f-banner" accept="image/*" style="color:#00a884; margin-bottom:15px; font-size:12px;">
+                    
+                    <button class="btn btn-save" onclick="guardar()">GUARDAR EN NUBE</button>
                 </div>
             </div>
-        </div>
-
-        <div id="editor-ui">
-            <h3 style="margin-bottom: 15px; color: #00a884;">Configurar Perfil</h3>
-            <div class="field">
-                <label>APODO</label>
-                <input type="text" id="edit-name">
-            </div>
-            <div class="field">
-                <label>FOTO PERFIL</label>
-                <input type="file" id="file-pfp" accept="image/*">
-            </div>
-            <div class="field">
-                <label>BANNER</label>
-                <input type="file" id="file-banner" accept="image/*">
-            </div>
-            <button class="btn btn-save" onclick="upload()">GUARDAR CAMBIOS</button>
-            <button class="btn" style="background:transparent; color:#8696a0;" onclick="showEditor()">Cancelar</button>
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
-            authDomain: "ingresa-dfec2.firebaseapp.com",
-            projectId: "ingresa-dfec2",
-            storageBucket: "ingresa-dfec2.appspot.com",
-            messagingSenderId: "441882283200",
-            appId: "1:441882283200:web:8067df85facc2d67d77125"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-        function goHome() { window.location.href = window.location.pathname; }
-        function showEditor() {
-            const ui = document.getElementById('editor-ui');
-            ui.style.display = (ui.style.display === 'block') ? 'none' : 'block';
-        }
+// TU CONFIGURACIÓN EXACTA DEL CHAT
+const firebaseConfig = {
+  apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
+  authDomain: "ingresa-dfec2.firebaseapp.com",
+  databaseURL: "https://ingresa-dfec2-default-rtdb.firebaseio.com",
+  projectId: "ingresa-dfec2",
+  storageBucket: "ingresa-dfec2.appspot.com",
+  messagingSenderId: "441882283200",
+  appId: "1:441882283200:web:8067df85facc2d67d77125"
+};
 
-        const toBase64 = f => new Promise(res => {
-            const r = new FileReader();
-            r.readAsDataURL(f);
-            r.onload = () => res(r.result);
-        });
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-        async function upload() {
-            const u = auth.currentUser;
-            const name = document.getElementById('edit-name').value;
-            const fp = document.getElementById('file-pfp').files[0];
-            const fb = document.getElementById('file-banner').files[0];
+// Sacamos el nombre del usuario igual que en tu chat
+let miNombre = localStorage.getItem("chat_user");
 
-            let obj = { name: name || u.displayName };
-            if(fp) obj.pfp = await toBase64(fp);
-            if(fb) obj.banner = await toBase64(fb);
+// Si no hay sesión, mandarlo al chat para que se registre con PIN
+if(!miNombre) {
+    alert("Inicia sesión en el chat primero");
+    window.location.href = "index.html"; // O el nombre de tu archivo de chat
+}
 
-            await db.collection("users").doc(u.uid).set(obj, {merge: true});
-            location.reload();
-        }
+const params = new URLSearchParams(window.location.search);
+const idUrl = params.get('u'); // Para ver perfiles ajenos
+const objetivo = idUrl || miNombre;
 
-        function copyLink() {
-            const link = `${window.location.origin}${window.location.pathname}?id=${auth.currentUser.uid}`;
-            navigator.clipboard.writeText(link);
-            alert("Link copiado. Pásalo para que vean tu perfil.");
-        }
+// Referencia al perfil en la base de datos
+const perfilRef = ref(db, 'perfiles/' + objetivo);
 
-        auth.onAuthStateChanged(async user => {
-            const params = new URLSearchParams(window.location.search);
-            const viewId = params.get('id');
-            const target = viewId || (user ? user.uid : null);
+// LEER DATOS (Igual que en tu chat, en tiempo real)
+onValue(perfilRef, (snapshot) => {
+    const d = snapshot.val();
+    if(d) {
+        document.getElementById('v-name').innerText = d.name;
+        if(d.pfp) document.getElementById('v-pfp').src = d.pfp;
+        if(d.banner) document.getElementById('v-banner').src = d.banner;
+    } else {
+        document.getElementById('v-name').innerText = objetivo;
+    }
 
-            if (user) {
-                document.getElementById('btn-login').classList.add('hidden');
-                document.getElementById('nav-pfp').classList.remove('hidden');
-                document.getElementById('nav-pfp').src = user.photoURL;
-            }
+    // Si es mi perfil, muestro botones de edición
+    if(objetivo === miNombre) {
+        document.getElementById('owner-actions').classList.remove('hidden');
+        document.getElementById('i-name').value = document.getElementById('v-name').innerText;
+    }
+});
 
-            if (target) {
-                const doc = await db.collection("users").doc(target).get();
-                const d = doc.data() || {};
-                
-                // Mostrar datos (Prioridad: Firestore > Google > Default)
-                document.getElementById('v-name').innerText = d.name || (user && target === user.uid ? user.displayName : "Usuario");
-                document.getElementById('v-pfp').src = d.pfp || (user && target === user.uid ? user.photoURL : "https://cdn-icons-png.flaticon.com/512/149/149071.png");
-                document.getElementById('v-banner').src = d.banner || "https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png";
+// FUNCIONES GLOBALES
+window.toggleEdit = () => {
+    const ed = document.getElementById('editor');
+    ed.style.display = (ed.style.display === 'block') ? 'none' : 'block';
+};
 
-                if (user && target === user.uid) {
-                    document.getElementById('owner-tools').classList.remove('hidden');
-                    document.getElementById('edit-name').value = d.name || user.displayName;
-                }
+window.compartir = () => {
+    const link = window.location.origin + window.location.pathname + "?u=" + miNombre;
+    navigator.clipboard.writeText(link);
+    alert("¡Link de perfil copiado!");
+};
 
-                document.getElementById('status-msg').classList.add('hidden');
-                document.getElementById('main-view').classList.remove('hidden');
-            } else {
-                document.getElementById('status-msg').innerText = "Inicia sesión para ver tu perfil";
-            }
-        });
-    </script>
+window.guardar = async () => {
+    const nuevoNombre = document.getElementById('i-name').value;
+    const pfpFile = document.getElementById('f-pfp').files[0];
+    const bannerFile = document.getElementById('f-banner').files[0];
+
+    let updates = { name: nuevoNombre };
+
+    // Función para convertir a Base64 (la misma que usas para enviar fotos en el chat)
+    const toBase64 = file => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+    });
+
+    if(pfpFile) updates.pfp = await toBase64(pfpFile);
+    if(bannerFile) updates.banner = await toBase64(bannerFile);
+
+    set(perfilRef, updates).then(() => {
+        alert("¡Perfil actualizado!");
+        window.toggleEdit();
+    });
+};
+</script>
 </body>
 </html>
