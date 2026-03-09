@@ -3,96 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrizZapp | Acceso</title>
+    <title>CrizZapp | Mi Perfil</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #020406; 
-            color: #fff; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #020406; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .card { background: #0d1218; border-radius: 20px; border: 1px solid #1f2937; width: 100%; max-width: 380px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-        .card { 
-            background: #0d1218; 
-            border-radius: 20px; 
-            border: 1px solid #1f2937; 
-            text-align: center; 
-            width: 350px; 
-            overflow: hidden; /* Importante para que el banner no se salga */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* --- SECCIÓN DEL BANNER Y FOTO --- */
-        .profile-header {
-            position: relative;
-            height: 120px;
-            background: #1a222c;
-        }
-
-        .banner-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            background: linear-gradient(45deg, #0f172a, #4facfe);
-        }
-
-        .user-img-container {
-            position: absolute;
-            bottom: -40px; /* Baja la foto para que quede a mitad del banner */
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .user-img { 
-            width: 90px; 
-            height: 90px;
-            border-radius: 50%; 
-            border: 4px solid #0d1218; /* Borde del color del fondo para resaltar */
-            background: #0d1218;
-            object-fit: cover;
-        }
+        /* --- BANNER Y FOTO --- */
+        .profile-header { position: relative; height: 130px; background: #1a222c; }
+        .banner-img { width: 100%; height: 100%; object-fit: cover; }
+        .user-img-container { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
+        .user-img { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #0d1218; object-fit: cover; background: #0d1218; }
 
         /* --- CONTENIDO --- */
-        .profile-body {
-            padding: 55px 25px 25px 25px; /* Padding superior extra para compensar la foto */
-        }
+        .profile-body { padding: 60px 25px 25px; text-align: center; }
+        .nickname { font-size: 1.5rem; font-weight: bold; color: #4facfe; margin-bottom: 20px; }
 
-        h1 { color: #4facfe; margin-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 15px rgba(79, 172, 254, 0.4); }
-        .nickname { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; color: #fff; }
-        .status { color: #00ff88; font-size: 0.85em; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        /* --- FORMULARIO DE EDICIÓN --- */
+        .edit-section { background: #161d26; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
+        label { font-size: 0.75rem; color: #8696a0; text-transform: uppercase; letter-spacing: 1px; }
+        input { width: 100%; background: #0d1218; border: 1px solid #334155; padding: 8px; border-radius: 6px; color: #fff; margin-bottom: 10px; outline: none; }
+        input:focus { border-color: #4facfe; }
 
-        .btn { 
-            background: #fff; 
-            color: #000; 
-            border: none; 
-            padding: 12px; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            width: 100%; 
-            transition: 0.3s;
-        }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-
-        .btn-panel { background: #4facfe; color: white; margin-top: 10px; }
-
-        .content { display: none; }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-google { background: #fff; color: #000; }
+        .btn-save { background: #4facfe; color: #fff; margin-top: 5px; }
         
-        .logout-link { 
-            margin-top: 20px; 
-            font-size: 0.8em; 
-            color: #ff3d00; 
-            cursor: pointer; 
-            text-decoration: underline;
-        }
+        .logout-link { margin-top: 15px; font-size: 0.8em; color: #ff3d00; cursor: pointer; display: inline-block; }
+        .content { display: none; }
     </style>
 </head>
 <body>
@@ -100,30 +42,40 @@
     <div class="card">
         <div id="main-box" class="content">
             <div class="profile-header">
-                <img id="banner" src="https://wallpapers.com/images/hd/neon-blue-abstract-digital-art-4k-76v9q8z8i3n9v6z6.jpg" class="banner-img">
+                <img id="view-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop" class="banner-img">
                 <div class="user-img-container">
-                    <img id="pfp" src="" class="user-img">
+                    <img id="view-pfp" src="" class="user-img">
                 </div>
             </div>
 
             <div class="profile-body">
-                <h3 id="name" class="nickname"></h3>
-                <p class="status"><span>●</span> Acceso Autorizado</p>
-                
-                <button onclick="location.href='panel.html'" class="btn btn-panel">IR AL PANEL</button>
+                <div id="view-name" class="nickname">Cargando...</div>
+
+                <div class="edit-section">
+                    <label>Apodo Personalizado</label>
+                    <input type="text" id="input-name" placeholder="Tu nuevo apodo">
+                    
+                    <label>URL de Foto de Perfil</label>
+                    <input type="text" id="input-pfp" placeholder="https://imagen.com/foto.png">
+                    
+                    <label>URL de Banner</label>
+                    <input type="text" id="input-banner" placeholder="https://imagen.com/banner.png">
+                    
+                    <button onclick="saveChanges()" class="btn btn-save">GUARDAR CAMBIOS</button>
+                </div>
+
                 <p onclick="logout()" class="logout-link">Cerrar Sesión</p>
             </div>
         </div>
 
-        <div id="login-box" style="padding: 40px 30px;">
-            <h1>CrizZapp</h1>
-            <p style="margin-bottom: 25px; color: #8696a0;">Inicia sesión con Google para acceder a tu perfil</p>
-            <button class="btn" onclick="login()">ENTRAR CON GOOGLE</button>
+        <div id="login-box" style="padding: 50px 30px; text-align: center;">
+            <h1 style="color: #4facfe; margin-bottom: 10px;">CrizZapp</h1>
+            <p style="color: #8696a0; margin-bottom: 30px;">Inicia sesión para personalizar tu perfil</p>
+            <button class="btn btn-google" onclick="login()">ENTRAR CON GOOGLE</button>
         </div>
     </div>
 
     <script>
-        // Tu configuración de Firebase (Se mantiene igual)
         const firebaseConfig = {
             apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
             authDomain: "ingresa-dfec2.firebaseapp.com",
@@ -145,21 +97,47 @@
             auth.signOut();
         }
 
-        auth.onAuthStateChanged(user => {
-            const loginBox = document.getElementById('login-box');
-            const mainBox = document.getElementById('main-box');
+        // Función para guardar los datos en el navegador del usuario
+        function saveChanges() {
+            const newName = document.getElementById('input-name').value;
+            const newPfp = document.getElementById('input-pfp').value;
+            const newBanner = document.getElementById('input-banner').value;
 
+            localStorage.setItem('custom_name', newName);
+            localStorage.setItem('custom_pfp', newPfp);
+            localStorage.setItem('custom_banner', newBanner);
+
+            updateUI(); // Refresca la vista
+            alert("¡Perfil actualizado con éxito!");
+        }
+
+        function updateUI() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Prioridad: 1. Lo guardado en localStorage, 2. Lo de Google
+            const finalName = localStorage.getItem('custom_name') || user.displayName;
+            const finalPfp = localStorage.getItem('custom_pfp') || user.photoURL;
+            const finalBanner = localStorage.getItem('custom_banner') || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop";
+
+            document.getElementById('view-name').innerText = finalName;
+            document.getElementById('view-pfp').src = finalPfp;
+            document.getElementById('view-banner').src = finalBanner;
+
+            // Llenar los inputs con lo que está actual por si quiere volver a editar
+            document.getElementById('input-name').value = finalName;
+            document.getElementById('input-pfp').value = finalPfp;
+            document.getElementById('input-banner').value = finalBanner;
+        }
+
+        auth.onAuthStateChanged(user => {
             if (user) {
-                loginBox.style.display = 'none';
-                mainBox.style.display = 'block';
-                document.getElementById('name').innerText = user.displayName;
-                document.getElementById('pfp').src = user.photoURL;
-                
-                // Opcional: Si quieres que el banner también sea dinámico (puedes guardarlo en Firestore después)
-                // document.getElementById('banner').src = "URL_DE_TU_BANNER";
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('main-box').style.display = 'block';
+                updateUI();
             } else {
-                loginBox.style.display = 'block';
-                mainBox.style.display = 'none';
+                document.getElementById('login-box').style.display = 'block';
+                document.getElementById('main-box').style.display = 'none';
             }
         });
     </script>
