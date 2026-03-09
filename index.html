@@ -19,11 +19,18 @@
         header { width: 100%; height: 60px; background: #202c33; padding: 0 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884; position: sticky; top:0; z-index: 100; gap: 10px; }
         .mini-pfp { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #00a884; object-fit: cover; cursor: pointer; flex-shrink: 0; }
 
+        /* BUSCADOR EN HEADER */
         .search-container { flex-grow: 1; position: relative; }
         .search-input { width: 100%; padding: 8px 15px; border-radius: 20px; border: 1px solid #2a3942; background: #111b21; color: white; outline: none; font-size: 14px; }
-        #search-results { position: absolute; top: 45px; width: 100%; background: #111b21; border-radius: 10px; border: 1px solid #00a884; max-height: 300px; overflow-y: auto; display: none; z-index: 500; }
+        .search-input:focus { border-color: #00a884; }
+
+        /* RESULTADOS DE BÚSQUEDA */
+        #search-results { position: absolute; top: 45px; width: 100%; background: #111b21; border-radius: 10px; border: 1px solid #00a884; max-height: 300px; overflow-y: auto; display: none; z-index: 500; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .res-item { padding: 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2a3942; cursor: pointer; }
+        .res-item:hover { background: #202c33; }
         .res-pfp { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        .res-info { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .res-tag { font-size: 10px; color: #00a884; text-transform: uppercase; font-weight: bold; }
 
         .profile-card { background: #111b21; width: 95%; max-width: 450px; border-radius: 0 0 20px 20px; border: 1px solid #00a884; border-top: none; overflow: hidden; position: relative; margin: 0 auto 20px; padding-bottom: 20px; }
         .banner { height: 130px; background: #2a3942; }
@@ -34,9 +41,11 @@
         .info { margin-top: 55px; text-align: center; padding: 0 15px; }
         .name-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .name { font-size: 1.5rem; font-weight: bold; color: #00a884; }
-        .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background-color: #00a884; color: #111b21; border-radius: 50%; font-size: 11px; font-weight: bold; }
         .share-p-btn { font-size: 18px; cursor: pointer; color: #00a884; background: rgba(0,168,132,0.1); padding: 5px; border-radius: 50%; }
-
+        
+        .bio { color: #8696a0; font-size: 14px; margin: 8px 0; }
+        .stats { color: #00e676; font-size: 13px; font-weight: bold; }
+        
         .btn-action { padding: 10px 25px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; width: 80%; }
         .btn-edit { background: transparent; border: 1px solid #00a884; color: white; }
         .btn-follow { background: #00a884; color: white; }
@@ -55,13 +64,17 @@
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
         .modal-c { background: #111b21; padding: 20px; border-radius: 15px; border: 1px solid #00a884; width: 100%; max-width: 380px; }
         input, textarea { width: 100%; padding: 12px; background: #2a3942; border: none; border-radius: 10px; color: white; margin: 10px 0; outline: none; }
+
+.hidden { display: none !important; }
+
+        
         .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: #00a884; border-radius: 50%; border: none; font-size: 30px; color: white; z-index: 90; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
     <header>
-        <div id="logo-crizz" style="color:#00a884; font-weight:bold; cursor:pointer;">CrizZapp</div>
+        <div style="color:#00a884; font-weight:bold; cursor:pointer;" onclick="window.location.search=''">CrizZapp</div>
         <div class="search-container">
             <input type="text" id="main-search" class="search-input" placeholder="Buscar usuarios o frases..." oninput="searchApp(this.value)">
             <div id="search-results"></div>
@@ -78,11 +91,12 @@
                     <div id="v-name" class="name">Usuario</div>
                     <span class="share-p-btn" onclick="shareProfile()">🔗</span>
                 </div>
-                <div id="v-bio" style="color:#8696a0; font-size:14px; margin:8px 0;">Cargando...</div>
-                <div style="color:#00e676; font-size:13px; font-weight:bold;"><span id="f-count">0 Seguidores</span></div>
+                <div id="v-bio" class="bio">Cargando...</div>
+                <div class="stats"><span id="f-count">0 Seguidores</span></div>
                 <div id="profile-btns"></div>
             </div>
         </div>
+        <div style="width:100%; text-align:center; padding:15px; color:#00a884; font-weight:bold; border-bottom:1px solid #2a3942;">PUBLICACIONES</div>
         <div class="grid-container" id="post-grid"></div>
     </div>
 
@@ -91,7 +105,7 @@
         <div id="feed-content"></div>
     </div>
 
-    <button id="add-btn" class="fab" style="display:none;" onclick="openM('m-post')">+</button>
+    <button id="add-btn" class="fab hidden" onclick="openM('m-post')">+</button>
 
     <div id="m-edit" class="modal"><div class="modal-c">
         <h3 style="color:#00a884">Ajustes de Perfil</h3>
@@ -102,8 +116,8 @@
         <label style="font-size:11px; color:#8696a0">BANNER</label>
         <input type="file" id="ed-banner" accept="image/*">
         <button class="btn-action btn-follow" style="width:100%" onclick="saveProfile()">GUARDAR CAMBIOS</button>
-        <button class="btn-action" style="width:100%; background:#ae2012; color:white; margin-top:10px;" onclick="logout()">CERRAR SESIÓN</button>
-        <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Cancelar</button>
+        <button class="btn-action" style="width:100%; background:#ae2012; color:white; margin-top:15px; border:none;" onclick="logout()">CERRAR SESIÓN</button>
+        <button class="btn-action" style="border:none; width:100%; color:white;" onclick="closeM()">Cancelar</button>
     </div></div>
 
     <div id="m-post" class="modal"><div class="modal-c">
@@ -113,21 +127,22 @@
         <button class="btn-action btn-follow" style="width:100%" onclick="uploadPost()">PUBLICAR</button>
         <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Cancelar</button>
     </div></div>
-
-    <div id="m-admin" class="modal"><div class="modal-c" style="border-color: #ff0055;">
+   
+       <div id="m-admin" class="modal"><div class="modal-c" style="border-color: #ff0055;">
         <h3 style="color:#ff0055">CrizZapPro Admin</h3>
         <input type="password" id="admin-pin" placeholder="PIN Secreto">
         <div id="admin-tools" style="display:none; margin-top:10px;">
             <input type="text" id="admin-search-user" placeholder="Nombre del usuario..." oninput="searchAdminUser(this.value)">
-            <div id="admin-res" style="max-height:100px; overflow-y:auto; background:#0b141a; border-radius:5px; margin-bottom:10px;"></div>
+            <div id="admin-res" style="max-height:100px; overflow-y:auto; background:#0b141a; border-radius:5px; margin-bottom:10px; font-size:12px;"></div>
             <p id="selected-user-text" style="font-size:10px; color:#00a884;"></p>
             <input type="hidden" id="verify-uid">
-            <button class="btn-action" style="background:#00a884; color:white; width:100%;" onclick="makeVerified()">VERIFICAR</button>
-            <button class="btn-action" style="background:#ae2012; color:white; width:100%; margin-top:5px;" onclick="removeVerified()">QUITAR VERIFICADO</button>
+            <button class="btn-action" style="background:#00a884; color:white; width:100%; border:none;" onclick="makeVerified()">VERIFICAR</button>
+            <button class="btn-action" style="background:#ae2012; color:white; width:100%; margin-top:5px; border:none;" onclick="removeVerified()">QUITAR VERIFICADO</button>
         </div>
         <button id="btn-unlock" class="btn-action btn-edit" style="width:100%" onclick="unlockAdmin()">ENTRAR</button>
-        <button class="btn-action" style="width:100%; color:white;" onclick="closeM()">Salir</button>
+        <button class="btn-action" style="width:100%; color:white; border:none;" onclick="closeM()">Salir</button>
     </div></div>
+
 
 <script>
     const firebaseConfig = {
@@ -157,7 +172,63 @@
         r.readAsDataURL(f);
     });
 
-    // --- LÓGICA DE LIKES ---
+    // BUSCADOR REALTIME
+    function searchApp(val) {
+        const box = document.getElementById('search-results');
+        if (val.length < 2) { box.style.display = 'none'; return; }
+        box.style.display = 'block';
+        box.innerHTML = `<div style="padding:10px; font-size:12px; color:#8696a0;">Buscando...</div>`;
+
+        let results = "";
+        const query = val.toLowerCase();
+
+        // Buscar Usuarios
+        db.ref('perfiles_google').once('value', snap => {
+            snap.forEach(u => {
+                const d = u.val();
+                if (d.name?.toLowerCase().includes(query)) {
+                    results += `<div class="res-item" onclick="window.location.search='?id=${u.key}'">
+                        <img class="res-pfp" src="${d.pfp || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
+                        <div class="res-info">
+                            <div class="res-tag">Usuario</div>
+                            <div>${d.name}</div>
+                        </div>
+                    </div>`;
+                }
+            });
+            
+            // Buscar en Posts
+            db.ref('posts').once('value', snapPosts => {
+                snapPosts.forEach(userPosts => {
+                    const uid = userPosts.key;
+                    userPosts.forEach(post => {
+                        const p = post.val();
+                        if (p.desc?.toLowerCase().includes(query)) {
+                            results += `<div class="res-item" onclick="window.location.search='?id=${uid}&post=${post.key}'">
+                                <img class="res-pfp" style="border-radius:5px" src="${p.img}">
+                                <div class="res-info">
+                                    <div class="res-tag">Publicación</div>
+                                    <div style="font-style:italic">"${p.desc.substring(0, 20)}..."</div>
+                                </div>
+                            </div>`;
+                        }
+                    });
+                });
+                box.innerHTML = results || `<div style="padding:10px; font-size:12px; color:#8696a0;">Sin resultados</div>`;
+            });
+        });
+    }
+
+    function shareProfile() {
+        navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid));
+        alert("Enlace del perfil copiado 👤");
+    }
+
+    function sharePost(pid) {
+        navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid) + "&post=" + pid);
+        alert("Enlace del post copiado 🔗");
+    }
+
     function toggleLike(pid, owner) {
         const u = auth.currentUser;
         if(!u) return alert("Logueate!");
@@ -173,7 +244,6 @@
         });
     }
 
-    // --- SUBIDA DE PERFIL Y POSTS ---
     async function saveProfile() {
         const u = auth.currentUser;
         const d = { name: document.getElementById('ed-name').value, bio: document.getElementById('ed-bio').value };
@@ -189,76 +259,124 @@
         db.ref('posts/'+u.uid).push({ img: b64, desc: document.getElementById('post-desc').value, likes: 0, time: Date.now() }).then(() => location.reload());
     }
 
-    // --- COMPARTIR ---
-    function shareProfile() {
-        navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid));
-        alert("Enlace copiado 👤");
-    }
-    function sharePost(pid) {
-        navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?id=" + (viewId || auth.currentUser.uid) + "&post=" + pid);
-        alert("Post copiado 🔗");
-    }
-
-    // --- BUSCADOR ---
-    function searchApp(val) {
-        const box = document.getElementById('search-results');
-        if (val.length < 2) { box.style.display = 'none'; return; }
-        box.style.display = 'block';
-        db.ref('perfiles_google').once('value', snap => {
-            let res = "";
-            snap.forEach(u => {
-                const d = u.val();
-                if (d.name?.toLowerCase().includes(val.toLowerCase())) {
-                    res += `<div class="res-item" onclick="window.location.search='?id=${u.key}'"><img src="${d.pfp || ''}" class="res-pfp"> ${d.name}</div>`;
-                }
-            });
-            box.innerHTML = res || "Sin resultados.";
-        });
-    }
-
-    // --- ADMIN PRO ---
-    let clicks = 0;
-    document.getElementById('logo-crizz').onclick = () => { clicks++; if(clicks === 5) openM('m-admin'); setTimeout(()=>clicks=0, 2000); };
-    function unlockAdmin() { if(document.getElementById('admin-pin').value === "2026") document.getElementById('admin-tools').style.display='block'; }
-    function searchAdminUser(val) {
-        const resBox = document.getElementById('admin-res');
-        if(val.length < 2) return;
-        db.ref('perfiles_google').once('value', snap => {
-            let html = "";
-            snap.forEach(u => { if(u.val().name?.toLowerCase().includes(val.toLowerCase())) html += `<div style="padding:5px; cursor:pointer;" onclick="selectUserAdmin('${u.key}', '${u.val().name}')">${u.val().name}</div>`; });
-            resBox.innerHTML = html;
-        });
-    }
-    function selectUserAdmin(uid, name) { document.getElementById('verify-uid').value = uid; document.getElementById('selected-user-text').innerText = "Seleccionado: " + name; document.getElementById('admin-res').innerHTML = ""; }
-    function makeVerified() { const uid=document.getElementById('verify-uid').value; if(uid) db.ref('verificados/'+uid).set(true).then(()=>alert("Verificado!")); }
-    function removeVerified() { const uid=document.getElementById('verify-uid').value; if(uid) db.ref('verificados/'+uid).remove().then(()=>alert("Eliminado.")); }
-
-    // --- CORE ---
     auth.onAuthStateChanged(user => {
         const target = viewId || (user ? user.uid : null);
         if(user) {
             document.getElementById('nav-user').innerHTML = `<img src="${user.photoURL}" class="mini-pfp" onclick="window.location.search=''">`;
-            if(target === user.uid) document.getElementById('add-btn').style.display = 'block';
+            if(target === user.uid) document.getElementById('add-btn').classList.remove('hidden');
         } else {
-            document.getElementById('nav-user').innerHTML = `<button onclick="auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())" style="background:#00a884; color:white; border:none; padding:7px 12px; border-radius:20px;">ENTRAR</button>`;
+            document.getElementById('nav-user').innerHTML = `<button onclick="auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())" style="background:#00a884; color:white; border:none; padding:7px 12px; border-radius:20px; font-size:10px; font-weight:bold;">ENTRAR</button>`;
         }
 
         if(target) {
             db.ref('perfiles_google/'+target).on('value', snap => {
                 const d = snap.val() || {};
-                db.ref('verificados/'+target).on('value', vSnap => {
-                    const check = vSnap.exists() ? '<span class="verified-badge">✓</span>' : '';
-                    document.getElementById('v-name').innerHTML = (d.name || "Usuario") + check;
-                });
+                db.ref('verificados/' + target).on('value', vSnap => {
+    const check = vSnap.exists() ? '<span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:#00a884; color:#111b21; border-radius:50%; font-size:11px; margin-left:5px; font-weight:bold;">✓</span>' : '';
+    document.getElementById('v-name').innerHTML = (d.name || "Usuario") + check;
+});
+
                 document.getElementById('v-bio').innerText = d.bio || "Sin biografía.";
                 document.getElementById('v-pfp').src = d.pfp || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                 document.getElementById('v-banner').src = d.banner || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000";
-                
-                let btns = (user && target === user.uid) ? `<button class="btn-action btn-edit" onclick="openM('m-edit')">AJUSTES</button>` : `<button id="f-btn" class="btn-action btn-follow">SEGUIR</button>`;
+                let btns = (user && target === user.uid) ? `<button class="btn-action btn-edit" onclick="openM('m-edit')">AJUSTES DE PERFIL</button>` : `<button id="f-btn" class="btn-action btn-follow" onclick="if(!auth.currentUser){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}else{db.ref('seguidores/'+target+'/'+auth.currentUser.uid).set(true)}">SEGUIR</button>`;
                 document.getElementById('profile-btns').innerHTML = btns;
             });
 
+                       // --- REEMPLAZO PARA SEGUIDORES ---
             db.ref(`seguidores/${target}`).on('value', s => {
                 document.getElementById('f-count').innerText = `${s.numChildren()} Seguidores`;
                 const b = document.getElementById('f-btn');
-                if(b && user)
+                
+                if(b && user) {
+                    if(s.hasChild(user.uid)) {
+                        // YA LO SIGUES
+                        b.innerText = "SIGUIENDO";
+                        b.style.background = "#202c33"; 
+                        b.onclick = () => db.ref(`seguidores/${target}/${user.uid}`).remove();
+                    } else {
+                        // NO LO SIGUES
+                        b.innerText = "SEGUIR";
+                        b.style.background = "#00a884";
+                        b.onclick = () => db.ref(`seguidores/${target}/${user.uid}`).set(true);
+                    }
+                }
+            });
+            // ---------------------------------
+
+
+            db.ref('posts/'+target).on('value', snap => {
+                const g = document.getElementById('post-grid'), f = document.getElementById('feed-content');
+                g.innerHTML = ""; f.innerHTML = "";
+                snap.forEach(c => {
+                    const p = c.val(), pid = c.key;
+                    g.innerHTML = `<div class="grid-item" onclick="document.getElementById('feed-view').style.display='block'; document.getElementById('${pid}').scrollIntoView();"><img src="${p.img}"></div>` + g.innerHTML;
+                    f.innerHTML = `
+                        <div class="post-fullscreen" id="${pid}">
+                            <img src="${p.img}">
+                            <div class="post-actions">
+                                <div class="action-btn" onclick="toggleLike('${pid}', '${target}')">👍</div>
+                                <div style="font-weight:bold; font-size:12px;">${p.likes || 0}</div>
+                                <div class="action-btn" onclick="sharePost('${pid}')">🔗</div>
+                            </div>
+                            <div class="post-data">
+                                <div style="font-weight:bold; color:#00a884">@${document.getElementById('v-name').innerText}</div>
+                                <div style="font-size:14px; margin-top:5px;">${p.desc}</div>
+                            </div>
+                        </div>` + f.innerHTML;
+                });
+                if(postIdParam) { 
+                    document.getElementById('feed-view').style.display='block'; 
+                    setTimeout(() => { const el = document.getElementById(postIdParam); if(el) el.scrollIntoView(); }, 800);
+                }
+            });
+        }
+    });
+        // --- LÓGICA DE ADMIN PRO ---
+    let secretClicks = 0;
+    document.querySelector('header div').onclick = () => {
+        secretClicks++;
+        if(secretClicks === 5) { openM('m-admin'); secretClicks = 0; }
+        setTimeout(() => secretClicks = 0, 3000);
+    };
+
+    function unlockAdmin() {
+        if(document.getElementById('admin-pin').value === "2026") {
+            document.getElementById('admin-tools').style.display = 'block';
+            document.getElementById('btn-unlock').style.display = 'none';
+        } else { alert("PIN Incorrecto"); }
+    }
+
+    function searchAdminUser(val) {
+        const resBox = document.getElementById('admin-res');
+        if(val.length < 2) return resBox.innerHTML = "";
+        db.ref('perfiles_google').once('value', snap => {
+            let html = "";
+            snap.forEach(u => {
+                if(u.val().name?.toLowerCase().includes(val.toLowerCase())) {
+                    html += `<div style="padding:8px; border-bottom:1px solid #2a3942; cursor:pointer;" onclick="selectUserAdmin('${u.key}', '${u.val().name}')">${u.val().name}</div>`;
+                }
+            });
+            resBox.innerHTML = html;
+        });
+    }
+
+    function selectUserAdmin(uid, name) {
+        document.getElementById('verify-uid').value = uid;
+        document.getElementById('selected-user-text').innerText = "Seleccionado: " + name;
+        document.getElementById('admin-res').innerHTML = "";
+    }
+
+    function makeVerified() {
+        const uid = document.getElementById('verify-uid').value;
+        if(uid) db.ref('verificados/' + uid).set(true).then(() => alert("¡Usuario Verificado!"));
+    }
+
+    function removeVerified() {
+        const uid = document.getElementById('verify-uid').value;
+        if(uid) db.ref('verificados/' + uid).remove().then(() => alert("Verificado quitado"));
+    }
+
+</script>
+</body>
+</html>
