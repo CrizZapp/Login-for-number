@@ -3,75 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrizZapp | Mi Perfil</title>
+    <title>CrizZapp | Perfil</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #020406; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #020406; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .card { background: #0d1218; border-radius: 20px; border: 1px solid #1f2937; width: 100%; max-width: 380px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .card { background: #0d1218; border-radius: 20px; border: 1px solid #1f2937; width: 360px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
 
-        /* --- BANNER Y FOTO --- */
-        .profile-header { position: relative; height: 130px; background: #1a222c; }
-        .banner-img { width: 100%; height: 100%; object-fit: cover; }
-        .user-img-container { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
-        .user-img { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #0d1218; object-fit: cover; background: #0d1218; }
+        /* --- CABECERA --- */
+        .header { position: relative; height: 140px; }
+        .banner { width: 100%; height: 100%; object-fit: cover; background: #1a222c; }
+        .pfp-container { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
+        .pfp { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #0d1218; object-fit: cover; background: #1a222c; }
 
         /* --- CONTENIDO --- */
-        .profile-body { padding: 60px 25px 25px; text-align: center; }
-        .nickname { font-size: 1.5rem; font-weight: bold; color: #4facfe; margin-bottom: 20px; }
+        .body { padding: 55px 20px 25px; text-align: center; }
+        #display-name { font-size: 1.6rem; font-weight: bold; color: #4facfe; margin-bottom: 20px; }
 
-        /* --- FORMULARIO DE EDICIÓN --- */
-        .edit-section { background: #161d26; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
-        label { font-size: 0.75rem; color: #8696a0; text-transform: uppercase; letter-spacing: 1px; }
-        input { width: 100%; background: #0d1218; border: 1px solid #334155; padding: 8px; border-radius: 6px; color: #fff; margin-bottom: 10px; outline: none; }
-        input:focus { border-color: #4facfe; }
-
-        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-google { background: #fff; color: #000; }
-        .btn-save { background: #4facfe; color: #fff; margin-top: 5px; }
+        /* --- BOTONES --- */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
+        .btn-edit { background: #1f2937; color: white; }
+        .btn-share { background: #4facfe; color: white; }
+        .btn-save { background: #00ff88; color: #000; width: 100%; margin-top: 10px; }
         
-        .logout-link { margin-top: 15px; font-size: 0.8em; color: #ff3d00; cursor: pointer; display: inline-block; }
-        .content { display: none; }
+        /* --- EDITOR (OCULTO POR DEFECTO) --- */
+        #editor { display: none; padding: 20px; background: #161d26; border-top: 1px solid #1f2937; text-align: left; }
+        .input-group { margin-bottom: 12px; }
+        label { font-size: 0.7rem; color: #8696a0; text-transform: uppercase; }
+        input[type="text"] { width: 100%; background: #0d1218; border: 1px solid #334155; padding: 8px; border-radius: 6px; color: #fff; margin-top: 5px; }
+        input[type="file"] { font-size: 0.8rem; margin-top: 5px; color: #4facfe; }
+
+        .logout { color: #ff3d00; cursor: pointer; font-size: 0.8rem; margin-top: 15px; display: inline-block; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div id="main-box" class="content">
-            <div class="profile-header">
-                <img id="view-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop" class="banner-img">
-                <div class="user-img-container">
-                    <img id="view-pfp" src="" class="user-img">
-                </div>
-            </div>
-
-            <div class="profile-body">
-                <div id="view-name" class="nickname">Cargando...</div>
-
-                <div class="edit-section">
-                    <label>Apodo Personalizado</label>
-                    <input type="text" id="input-name" placeholder="Tu nuevo apodo">
-                    
-                    <label>URL de Foto de Perfil</label>
-                    <input type="text" id="input-pfp" placeholder="https://imagen.com/foto.png">
-                    
-                    <label>URL de Banner</label>
-                    <input type="text" id="input-banner" placeholder="https://imagen.com/banner.png">
-                    
-                    <button onclick="saveChanges()" class="btn btn-save">GUARDAR CAMBIOS</button>
-                </div>
-
-                <p onclick="logout()" class="logout-link">Cerrar Sesión</p>
-            </div>
+        <div id="login-box" style="padding: 60px 30px; text-align: center;">
+            <h1>CrizZapp</h1>
+            <p style="color: #8696a0; margin: 20px 0;">Entra con Google para crear tu perfil</p>
+            <button onclick="login()" class="btn btn-share" style="width: 100%">LOGIN GOOGLE</button>
         </div>
 
-        <div id="login-box" style="padding: 50px 30px; text-align: center;">
-            <h1 style="color: #4facfe; margin-bottom: 10px;">CrizZapp</h1>
-            <p style="color: #8696a0; margin-bottom: 30px;">Inicia sesión para personalizar tu perfil</p>
-            <button class="btn btn-google" onclick="login()">ENTRAR CON GOOGLE</button>
+        <div id="main-box" class="hidden">
+            <div class="header">
+                <img id="view-banner" src="" class="banner">
+                <div class="pfp-container">
+                    <img id="view-pfp" src="" class="pfp">
+                </div>
+            </div>
+
+            <div class="body">
+                <div id="display-name">Usuario</div>
+                
+                <div class="btn-group" id="main-actions">
+                    <button class="btn btn-edit" onclick="toggleEditor()">EDITAR</button>
+                    <button class="btn btn-share" onclick="shareProfile()">COMPARTIR</button>
+                </div>
+
+                <div id="editor">
+                    <div class="input-group">
+                        <label>Apodo</label>
+                        <input type="text" id="edit-name">
+                    </div>
+                    <div class="input-group">
+                        <label>Foto de Perfil (Subir archivo)</label>
+                        <input type="file" id="file-pfp" accept="image/*">
+                    </div>
+                    <div class="input-group">
+                        <label>Banner (Subir archivo)</label>
+                        <input type="file" id="file-banner" accept="image/*">
+                    </div>
+                    <button class="btn btn-save" onclick="saveData()">GUARDAR Y CERRAR</button>
+                    <p onclick="toggleEditor()" style="text-align: center; font-size: 0.7rem; margin-top: 10px; cursor: pointer;">Cancelar</p>
+                </div>
+
+                <p onclick="logout()" class="logout">Cerrar Sesión</p>
+            </div>
         </div>
     </div>
 
@@ -84,60 +97,65 @@
             messagingSenderId: "441882283200",
             appId: "1:441882283200:web:8067df85facc2d67d77125"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const provider = new firebase.auth.GoogleAuthProvider();
 
-        function login() {
-            auth.signInWithPopup(provider).catch(e => alert("Error: " + e.message));
+        function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+        function logout() { auth.signOut(); localStorage.clear(); location.reload(); }
+
+        function toggleEditor() {
+            const editor = document.getElementById('editor');
+            const actions = document.getElementById('main-actions');
+            const isVisible = editor.style.display === 'block';
+            editor.style.display = isVisible ? 'none' : 'block';
+            actions.style.display = isVisible ? 'flex' : 'none';
         }
 
-        function logout() {
-            auth.signOut();
+        // Convierte archivos subidos a texto (Base64) para guardarlos en el navegador
+        function readFile(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
         }
 
-        // Función para guardar los datos en el navegador del usuario
-        function saveChanges() {
-            const newName = document.getElementById('input-name').value;
-            const newPfp = document.getElementById('input-pfp').value;
-            const newBanner = document.getElementById('input-banner').value;
+        async function saveData() {
+            const name = document.getElementById('edit-name').value;
+            const pfpFile = document.getElementById('file-pfp').files[0];
+            const bannerFile = document.getElementById('file-banner').files[0];
 
-            localStorage.setItem('custom_name', newName);
-            localStorage.setItem('custom_pfp', newPfp);
-            localStorage.setItem('custom_banner', newBanner);
+            if(name) localStorage.setItem('crizz_name', name);
+            if(pfpFile) localStorage.setItem('crizz_pfp', await readFile(pfpFile));
+            if(bannerFile) localStorage.setItem('crizz_banner', await readFile(bannerFile));
 
-            updateUI(); // Refresca la vista
-            alert("¡Perfil actualizado con éxito!");
+            loadProfile();
+            toggleEditor();
         }
 
-        function updateUI() {
+        function loadProfile() {
             const user = auth.currentUser;
-            if (!user) return;
+            if(!user) return;
 
-            // Prioridad: 1. Lo guardado en localStorage, 2. Lo de Google
-            const finalName = localStorage.getItem('custom_name') || user.displayName;
-            const finalPfp = localStorage.getItem('custom_pfp') || user.photoURL;
-            const finalBanner = localStorage.getItem('custom_banner') || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop";
+            document.getElementById('display-name').innerText = localStorage.getItem('crizz_name') || user.displayName;
+            document.getElementById('view-pfp').src = localStorage.getItem('crizz_pfp') || user.photoURL;
+            document.getElementById('view-banner').src = localStorage.getItem('crizz_banner') || "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop";
+            
+            document.getElementById('edit-name').value = localStorage.getItem('crizz_name') || user.displayName;
+        }
 
-            document.getElementById('view-name').innerText = finalName;
-            document.getElementById('view-pfp').src = finalPfp;
-            document.getElementById('view-banner').src = finalBanner;
-
-            // Llenar los inputs con lo que está actual por si quiere volver a editar
-            document.getElementById('input-name').value = finalName;
-            document.getElementById('input-pfp').value = finalPfp;
-            document.getElementById('input-banner').value = finalBanner;
+        function shareProfile() {
+            const name = document.getElementById('display-name').innerText;
+            const url = window.location.href;
+            navigator.clipboard.writeText(`¡Mira mi perfil de CrizZapp! Nombre: ${name} \nLink: ${url}`);
+            alert("¡Link de perfil copiado al portapapeles!");
         }
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('main-box').style.display = 'block';
-                updateUI();
-            } else {
-                document.getElementById('login-box').style.display = 'block';
-                document.getElementById('main-box').style.display = 'none';
+                document.getElementById('login-box').classList.add('hidden');
+                document.getElementById('main-box').classList.remove('hidden');
+                loadProfile();
             }
         });
     </script>
