@@ -4,205 +4,175 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CrizZapp | Perfil</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            margin: 0; 
-            font-family: sans-serif; 
-            background-color: #0b141a; 
+            margin: 0; font-family: sans-serif; background-color: #0b141a; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
         }
 
+        /* NAVBAR */
+        header { 
+            width: 100%; max-width: 450px; background: #202c33; padding: 10px 15px; 
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00a884;
+        }
+        .mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00a884; cursor: pointer; object-fit: cover; }
+
+        /* TARJETA */
         .card { 
-            background: #111b21; 
-            width: 350px; 
-            border-radius: 20px; 
-            border: 1px solid #00a884; 
-            overflow: hidden; 
-            box-shadow: 0 0 20px rgba(0, 168, 132, 0.3);
-            position: relative;
+            background: #111b21; width: 90%; max-width: 380px; border-radius: 20px; 
+            border: 1px solid #00a884; overflow: hidden; margin-top: 30px; box-shadow: 0 0 20px rgba(0, 168, 132, 0.2);
         }
 
-        /* BANNER Y FOTO */
-        .header-perfil { position: relative; height: 130px; background: #202c33; }
+        .banner-h { position: relative; height: 130px; background: #2a3942; }
         #v-banner { width: 100%; height: 100%; object-fit: cover; }
         
-        .pfp-cont { 
-            position: absolute; 
-            bottom: -45px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-        }
-        #v-pfp { 
-            width: 100px; 
-            height: 100px; 
-            border-radius: 50%; 
-            border: 4px solid #111b21; 
-            background: #2a3942;
-            object-fit: cover;
-        }
+        .pfp-h { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); }
+        #v-pfp { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #111b21; object-fit: cover; background: #202c33; }
 
-        /* CONTENIDO */
-        .body-perfil { padding: 55px 20px 20px; text-align: center; }
-        #v-name { font-size: 1.6rem; font-weight: bold; color: #00a884; text-shadow: 0 0 10px rgba(0, 168, 132, 0.5); margin-bottom: 20px; }
+        .info { padding: 55px 20px 25px; text-align: center; }
+        #v-name { font-size: 1.5rem; font-weight: bold; color: #00a884; margin-bottom: 20px; }
 
-        .btn { 
-            width: 100%; 
-            padding: 12px; 
-            border-radius: 25px; 
-            border: none; 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-bottom: 10px;
-            transition: 0.3s;
-        }
+        /* BOTONES */
+        .btn { padding: 12px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; }
         .btn-edit { background: #202c33; color: white; border: 1px solid #00a884; }
         .btn-share { background: #00a884; color: white; }
-        .btn-save { background: #00e676; color: black; margin-top: 10px; }
 
-        /* EDITOR OCULTO */
-        #editor { display: none; padding: 15px; background: #1f2c33; text-align: left; }
-        input[type="text"] { 
-            width: 100%; 
-            padding: 10px; 
-            border-radius: 10px; 
-            border: none; 
-            background: #2a3942; 
-            color: white; 
-            margin: 5px 0 15px;
-            outline: none;
-        }
-        label { font-size: 12px; color: #8696a0; font-weight: bold; }
+        /* EDITOR */
+        #editor { display: none; text-align: left; background: #1f2c33; padding: 15px; border-radius: 15px; }
+        label { font-size: 11px; color: #8696a0; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; background: #2a3942; border: none; border-radius: 8px; color: white; margin: 5px 0 15px; }
+        input[type="file"] { font-size: 12px; color: #00a884; margin-top: 5px; }
 
-        .hidden { display: none; }
+        #login-screen { position: fixed; inset: 0; background: #111b21; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div id="perfil-view">
-            <div class="header-perfil">
-                <img id="v-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000">
-                <div class="pfp-cont">
-                    <img id="v-pfp" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                </div>
+    <div id="login-screen">
+        <div style="text-align: center; background: #202c33; padding: 40px; border-radius: 20px; border: 1px solid #00a884;">
+            <h1 style="color:#00a884; margin-bottom: 20px;">CrizZapp</h1>
+            <button class="btn btn-share" onclick="login()">ENTRAR CON GOOGLE</button>
+        </div>
+    </div>
+
+    <header id="nav" class="hidden">
+        <div style="font-weight: bold; color:#00a884;">CrizZapp Perfil</div>
+        <img id="my-nav-pfp" class="mini-pfp" onclick="verMiPerfil()" title="Volver a mi perfil">
+    </header>
+
+    <div id="profile-card" class="card hidden">
+        <div class="banner-h">
+            <img id="v-banner" src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000">
+            <div class="pfp-h">
+                <img id="v-pfp" src="">
+            </div>
+        </div>
+        <div class="info">
+            <div id="v-name">Nombre</div>
+            
+            <div id="owner-actions" class="hidden">
+                <button class="btn btn-edit" onclick="toggleEdit()">EDITAR PERFIL</button>
+                <button class="btn btn-share" onclick="compartir()">COMPARTIR PERFIL</button>
             </div>
 
-            <div class="body-perfil">
-                <div id="v-name">Cargando...</div>
-                
-                <div id="owner-actions" class="hidden">
-                    <button class="btn btn-edit" onclick="toggleEdit()">EDITAR PERFIL</button>
-                    <button class="btn btn-share" onclick="compartir()">COMPARTIR PERFIL</button>
-                </div>
-
-                <div id="editor">
-                    <label>APODO</label>
-                    <input type="text" id="i-name">
-                    
-                    <label>CAMBIAR FOTO</label>
-                    <input type="file" id="f-pfp" accept="image/*" style="color:#00a884; margin-bottom:15px; font-size:12px;">
-                    
-                    <label>CAMBIAR BANNER</label>
-                    <input type="file" id="f-banner" accept="image/*" style="color:#00a884; margin-bottom:15px; font-size:12px;">
-                    
-                    <button class="btn btn-save" onclick="guardar()">GUARDAR EN NUBE</button>
-                </div>
+            <div id="editor">
+                <label>APODO</label>
+                <input type="text" id="i-name">
+                <label>FOTO PERFIL</label>
+                <input type="file" id="f-pfp" accept="image/*" style="display:block; margin-bottom:15px;">
+                <label>BANNER</label>
+                <input type="file" id="f-banner" accept="image/*" style="display:block; margin-bottom:15px;">
+                <button class="btn btn-share" style="background:#00e676; color:black;" onclick="guardar()">GUARDAR CAMBIOS</button>
             </div>
         </div>
     </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
+        authDomain: "ingresa-dfec2.firebaseapp.com",
+        databaseURL: "https://ingresa-dfec2-default-rtdb.firebaseio.com",
+        projectId: "ingresa-dfec2",
+        storageBucket: "ingresa-dfec2.appspot.com",
+        messagingSenderId: "441882283200",
+        appId: "1:441882283200:web:8067df85facc2d67d77125"
+    };
 
-// TU CONFIGURACIÓN EXACTA DEL CHAT
-const firebaseConfig = {
-  apiKey: "AIzaSyABaTv7yjGsgIu2A6mj6arml2IHGljt_H4",
-  authDomain: "ingresa-dfec2.firebaseapp.com",
-  databaseURL: "https://ingresa-dfec2-default-rtdb.firebaseio.com",
-  projectId: "ingresa-dfec2",
-  storageBucket: "ingresa-dfec2.appspot.com",
-  messagingSenderId: "441882283200",
-  appId: "1:441882283200:web:8067df85facc2d67d77125"
-};
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+    function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+    
+    function verMiPerfil() { window.location.href = window.location.pathname; }
 
-// Sacamos el nombre del usuario igual que en tu chat
-let miNombre = localStorage.getItem("chat_user");
-
-// Si no hay sesión, mandarlo al chat para que se registre con PIN
-if(!miNombre) {
-    alert("Inicia sesión en el chat primero");
-    window.location.href = "index.html"; // O el nombre de tu archivo de chat
-}
-
-const params = new URLSearchParams(window.location.search);
-const idUrl = params.get('u'); // Para ver perfiles ajenos
-const objetivo = idUrl || miNombre;
-
-// Referencia al perfil en la base de datos
-const perfilRef = ref(db, 'perfiles/' + objetivo);
-
-// LEER DATOS (Igual que en tu chat, en tiempo real)
-onValue(perfilRef, (snapshot) => {
-    const d = snapshot.val();
-    if(d) {
-        document.getElementById('v-name').innerText = d.name;
-        if(d.pfp) document.getElementById('v-pfp').src = d.pfp;
-        if(d.banner) document.getElementById('v-banner').src = d.banner;
-    } else {
-        document.getElementById('v-name').innerText = objetivo;
+    function toggleEdit() {
+        const ed = document.getElementById('editor');
+        ed.style.display = (ed.style.display === 'block') ? 'none' : 'block';
     }
 
-    // Si es mi perfil, muestro botones de edición
-    if(objetivo === miNombre) {
-        document.getElementById('owner-actions').classList.remove('hidden');
-        document.getElementById('i-name').value = document.getElementById('v-name').innerText;
-    }
-});
-
-// FUNCIONES GLOBALES
-window.toggleEdit = () => {
-    const ed = document.getElementById('editor');
-    ed.style.display = (ed.style.display === 'block') ? 'none' : 'block';
-};
-
-window.compartir = () => {
-    const link = window.location.origin + window.location.pathname + "?u=" + miNombre;
-    navigator.clipboard.writeText(link);
-    alert("¡Link de perfil copiado!");
-};
-
-window.guardar = async () => {
-    const nuevoNombre = document.getElementById('i-name').value;
-    const pfpFile = document.getElementById('f-pfp').files[0];
-    const bannerFile = document.getElementById('f-banner').files[0];
-
-    let updates = { name: nuevoNombre };
-
-    // Función para convertir a Base64 (la misma que usas para enviar fotos en el chat)
-    const toBase64 = file => new Promise((resolve) => {
+    const toBase64 = file => new Promise(res => {
         const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
+        reader.onload = e => res(e.target.result);
         reader.readAsDataURL(file);
     });
 
-    if(pfpFile) updates.pfp = await toBase64(pfpFile);
-    if(bannerFile) updates.banner = await toBase64(bannerFile);
+    async function guardar() {
+        const user = auth.currentUser;
+        const name = document.getElementById('i-name').value;
+        const pFile = document.getElementById('f-pfp').files[0];
+        const bFile = document.getElementById('f-banner').files[0];
 
-    set(perfilRef, updates).then(() => {
-        alert("¡Perfil actualizado!");
-        window.toggleEdit();
+        let data = { name: name || user.displayName };
+        if(pFile) data.pfp = await toBase64(pFile);
+        if(bFile) data.banner = await toBase64(bFile);
+
+        db.ref('perfiles_google/' + user.uid).update(data).then(() => {
+            alert("Perfil guardado");
+            location.reload();
+        });
+    }
+
+    function compartir() {
+        const link = window.location.origin + window.location.pathname + "?id=" + auth.currentUser.uid;
+        navigator.clipboard.writeText(link);
+        alert("¡Link copiado!");
+    }
+
+    auth.onAuthStateChanged(user => {
+        const params = new URLSearchParams(window.location.search);
+        const viewId = params.get('id');
+
+        if (user) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('nav').classList.remove('hidden');
+            document.getElementById('profile-card').classList.remove('hidden');
+            document.getElementById('my-nav-pfp').src = user.photoURL;
+
+            const target = viewId || user.uid;
+
+            db.ref('perfiles_google/' + target).on('value', snap => {
+                const d = snap.val() || {};
+                document.getElementById('v-name').innerText = d.name || (target === user.uid ? user.displayName : "Usuario");
+                document.getElementById('v-pfp').src = d.pfp || (target === user.uid ? user.photoURL : "");
+                if(d.banner) document.getElementById('v-banner').src = d.banner;
+
+                if (target === user.uid) {
+                    document.getElementById('owner-actions').classList.remove('hidden');
+                    document.getElementById('i-name').value = d.name || user.displayName;
+                } else {
+                    document.getElementById('owner-actions').classList.add('hidden');
+                }
+            });
+        }
     });
-};
 </script>
 </body>
 </html>
